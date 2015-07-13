@@ -35,24 +35,61 @@
 
 
     function Board() {
-        this.elems = new Array(config.gridWidth * config.gridHeight);
-        for (var x = 0; x < config.gridWidth; x++) {
-            for (var y = 0; y < config.gridHeight; y++) {
-                this.set(x, y, null);
+        this.elems = [];
+        for (var row = 0; row < config.gridHeight; row++) {
+            this.elems[row] = [];
+            for (var column = 0; column < config.gridWidth; column++) {
+                this.elems[row].push(null);
             }
         }
     }
 
     Board.prototype.get = function(x, y) {
-        return this.elems[x + config.gridHeight * y];
+        return this.elems[y][x];
     };
 
     Board.prototype.set = function(x, y, value) {
-        this.elems[x + config.gridHeight * y] = value;
+        this.elems[y][x] = value;
     };
 
     Board.prototype.insideBoard = function(x, y) {
         return x >= 0 && y >= 0 && x < config.gridWidth && y < config.gridHeight;
+    };
+
+    Board.prototype.checkFullRows = function() {
+        var isFull;
+        var fullRowIndexes = [];
+
+        this.elems.forEach(function(row, idx) {
+            isFull = row.every(function(column) {
+                return column !== null;
+            });
+            if (isFull) {
+                fullRowIndexes.unshift(idx);
+            }
+        });
+
+        this.removeRows(fullRowIndexes);
+    };
+
+    // Removes the rows with the given indexes, and adds equally
+    // many empty rows at the top; Note that the indexes need to be
+    // order *from higher to lower*
+    Board.prototype.removeRows = function(indexes) {
+        var i, j, emptyRow;
+
+        for (i = 0; i < indexes.length; i++) {
+            state.board.elems.splice(indexes[i], 1);
+        }
+
+        for (i = 0; i < indexes.length; i++) {
+            emptyRow = [];
+            for (j = 0; j < config.gridWidth; j++) {
+                emptyRow[j] = null;
+            }
+
+            state.board.elems.unshift(emptyRow);
+        }
     };
 
     Board.prototype.placePiece = function(piece) {
@@ -64,7 +101,7 @@
                     if (state.board.get(piece.x + x, piece.y + y) !== null) {
                         status = false;
                     } else {
-                        state.board.set(piece.x + x, piece.y + y, this.color);
+                        state.board.set(piece.x + x, piece.y + y, piece.color);
                     }
                 }
             }
@@ -74,14 +111,14 @@
     };
 
     Board.prototype.draw = function() {
-        var block;
+        var blockColor;
         var sz = config.blockSize;
 
         for (var x = 0; x < config.gridWidth; x++) {
             for (var y = 0; y < config.gridHeight; y++) {
-                block = this.get(x, y);
-                if (block !== null) {
-                    ctx.fillStyle = block;
+                blockColor = this.get(x, y);
+                if (blockColor !== null) {
+                    ctx.fillStyle = blockColor;
                     ctx.fillRect(x * sz + 1, y * sz + 1, sz - 2, sz - 2);
                 } else {
                     ctx.clearRect(x * sz, y * sz, sz, sz);
@@ -193,6 +230,8 @@
     game.dropPiece = function() {
         if (!state.currentPiece.moveDown()) {
             clearInterval(state.moveTimer);
+            state.board.checkFullRows();
+            state.board.draw();
             game.nextPiece();
         }
         state.board.draw();
