@@ -14,7 +14,9 @@
         [[1], [1], [1], [1]],
         [[0, 1, 0], [1, 1, 1]],
         [[1, 1, 0], [0, 1, 1]],
-        [[0, 1, 1], [1, 1, 0]]
+        [[0, 1, 1], [1, 1, 0]],
+        [[1, 1], [0, 1], [0, 1]],
+        [[1, 1], [1, 0], [1, 0]]
     ];
 
     var config = {
@@ -157,7 +159,9 @@
     Piece.prototype.clearCurrentPos = function() {
         var sz = config.blockSize;
         this.forEachBlock(function(x, y) {
-            ctx.clearRect((this.x + x) * sz, (this.y + y) * sz, sz, sz);
+            if (this.getBlock(x, y)) {
+                ctx.clearRect((this.x + x) * sz, (this.y + y) * sz, sz, sz);
+            }
         }, this);
     };
 
