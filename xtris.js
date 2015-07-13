@@ -9,14 +9,44 @@
     var ctx = c.getContext("2d");
     ctx.strokeStyle = "black";
 
-    var pieces = [
-        [[1, 1], [1, 1]],
-        [[1], [1], [1], [1]],
-        [[0, 1, 0], [1, 1, 1]],
-        [[1, 1, 0], [0, 1, 1]],
-        [[0, 1, 1], [1, 1, 0]],
-        [[1, 1], [0, 1], [0, 1]],
-        [[1, 1], [1, 0], [1, 0]]
+    var PIECES = [
+        [
+            [[1, 1], [1, 1]],
+        ],
+        [
+            [[1], [1], [1], [1]],
+            [[1, 1, 1, 1]]
+        ],
+        [
+            [[0, 1, 0], [1, 1, 1]],
+            [[1, 0], [1, 1], [1, 0]],
+            [[1, 1, 1], [0, 1, 0]],
+            [[0, 1], [1, 1], [0, 1]]
+        ],
+        [
+            [[1, 1, 0], [0, 1, 1]],
+            [[0, 1], [1, 1], [1, 0]],
+            [[0, 1, 1], [1, 1, 0]],
+            [[1, 0], [1, 1], [0, 1]]
+        ],
+        [
+            [[0, 1, 1], [1, 1, 0]],
+            [[1, 0], [1, 1], [0, 1]],
+            [[0, 1, 1], [1, 1, 0]],
+            [[0, 1], [1, 1], [1, 0]]
+        ],
+        [
+            [[1, 1], [0, 1], [0, 1]],
+            [[0, 0, 1], [1, 1, 1]],
+            [[1, 0], [1, 0], [1, 1]],
+            [[1, 1, 1], [1, 0, 0]]
+        ],
+        [
+            [[1, 1], [1, 0], [1, 0]],
+            [[1, 1, 1], [0, 0, 1]],
+            [[0, 1], [0, 1], [1, 1]],
+            [[1, 0, 0], [1, 1, 1]]
+        ]
     ];
 
     var config = {
@@ -101,7 +131,10 @@
                     if (state.board.get(piece.x + x, piece.y + y) !== null) {
                         status = false;
                     } else {
-                        state.board.set(piece.x + x, piece.y + y, piece.color);
+                        state.board.set(piece.x + x, piece.y + y, {
+                            color: piece.color,
+                            active: true
+                        });
                     }
                 }
             }
@@ -111,14 +144,14 @@
     };
 
     Board.prototype.draw = function() {
-        var blockColor;
+        var gridBlock;
         var sz = config.blockSize;
 
         for (var x = 0; x < config.gridWidth; x++) {
             for (var y = 0; y < config.gridHeight; y++) {
-                blockColor = this.get(x, y);
-                if (blockColor !== null) {
-                    ctx.fillStyle = blockColor;
+                gridBlock = this.get(x, y);
+                if (gridBlock !== null) {
+                    ctx.fillStyle = gridBlock.color;
                     ctx.fillRect(x * sz + 1, y * sz + 1, sz - 2, sz - 2);
                 } else {
                     ctx.clearRect(x * sz, y * sz, sz, sz);
@@ -132,7 +165,10 @@
         this.x = x;
         this.y = y;
         this.color = color;
-        this.blocks = pieces[Math.floor(Math.random() * pieces.length)];
+        this.pieceIdx = Math.floor(Math.random() * PIECES.length);
+        this.blocks = PIECES[this.pieceIdx][0];
+
+        this.rotationIndex = 0;
     }
 
     Piece.prototype.getBlock = function(x, y) {
@@ -188,11 +224,60 @@
 
         this.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
-                state.board.set(this.x + x, this.y + y, this.color);
+                state.board.set(this.x + x, this.y + y, {
+                    color: this.color,
+                    active: true
+                });
             }
         }, this);
 
         return true;
+    };
+
+    Piece.prototype.rotate = function() {
+        if (!this.canRotate()) {
+            return false;
+        }
+
+        this.forEachBlock(function(x, y) {
+            if (this.getBlock(x, y)) {
+                state.board.set(this.x + x, this.y + y, null);
+            }
+        }, this);
+
+        this.rotationIndex = (this.rotationIndex + 1) % PIECES[this.pieceIdx].length;
+        this.blocks = PIECES[this.pieceIdx][this.rotationIndex];
+
+        this.forEachBlock(function(x, y) {
+            if (this.getBlock(x, y)) {
+                state.board.set(this.x + x, this.y + y, {
+                    color: this.color,
+                    active: true
+                });
+            }
+        }, this);
+    };
+
+    Piece.prototype.canRotate = function() {
+        var gridBlock;
+        var ret = true;
+        var newRotationIndex = (this.rotationIndex + 1) % PIECES[this.pieceIdx].length;
+        var newBlocks = PIECES[this.pieceIdx][newRotationIndex];
+
+        for (var x = 0; x < newBlocks[0].length; x++) {
+            for (var y = 0; y < newBlocks.length; y++) {
+                if (!state.board.insideBoard(this.x + x, this.y + y)) {
+                    ret = false;
+                } else {
+                    gridBlock = state.board.get(this.x + x, this.y + y);
+                    if (gridBlock && !gridBlock.active) {
+                        ret = false;
+                    }
+                }
+            }
+        }
+
+        return ret;
     };
 
     Piece.prototype.forEachBlock = function(callback, thisValue) {
@@ -207,6 +292,17 @@
                 callback.call(T, x, y);
             }
         }
+    };
+
+    Piece.prototype.setInPlace = function() {
+        this.forEachBlock(function(x, y) {
+            if (this.getBlock(x, y) !== 0) {
+                state.board.set(this.x + x, this.y + y, {
+                    color: this.color,
+                    active: false
+                });
+            }
+        }, this);
     };
 
 
@@ -230,6 +326,7 @@
     game.dropPiece = function() {
         if (!state.currentPiece.moveDown()) {
             clearInterval(state.moveTimer);
+            state.currentPiece.setInPlace();
             state.board.checkFullRows();
             state.board.draw();
             game.nextPiece();
@@ -247,6 +344,9 @@
             state.board.draw();
         } else if (event.keyCode === 39) {
             state.currentPiece.moveRight();
+            state.board.draw();
+        } else if (event.keyCode === 38) {
+            state.currentPiece.rotate();
             state.board.draw();
         }
     }
