@@ -21,11 +21,13 @@
         blockSize: 30,
         gridWidth: 10,
         gridHeight: 20,
-        colors: ["green", "blue", "red", "orange"]
+        colors: ["green", "blue", "red", "orange"],
+        dropTimer: 300  // milliseconds
     };
 
     var state = {
         board: null,
+        currentPiece: null,
         moveTimer: null
     };
 
@@ -48,7 +50,7 @@
     };
 
     Board.prototype.insideBoard = function(x, y) {
-        return x < config.gridWidth && y < config.gridHeight;
+        return x >= 0 && y >= 0 && x < config.gridWidth && y < config.gridHeight;
     };
 
 
@@ -72,14 +74,21 @@
         }, this);
     };
 
-    Piece.prototype.canMoveDown = function() {
+    Piece.prototype.blockInsidePiece = function(x, y) {
+        return x < this.blocks[0].length
+            && y < this.blocks.length
+            && this.getBlock(x, y);
+    };
+
+
+    Piece.prototype.canMove = function(dx, dy) {
         var ret = true;
         for (var x = 0; x < this.blocks[0].length; x++) {
             for (var y = 0; y < this.blocks.length; y++) {
-                if (!this.blockInsidePiece(x, y + 1) &&
+                if (!this.blockInsidePiece(x + dx, y + dy) &&
                     this.getBlock(x, y) &&
-                    (!state.board.insideBoard(this.x + x, this.y + y + 1) ||
-                     state.board.get(this.x + x, this.y + y + 1))) {
+                    (!state.board.insideBoard(this.x + x + dx, this.y + y + dy) ||
+                     state.board.get(this.x + x + dx, this.y + y + dy))) {
                     ret = false;
                 }
             }
@@ -87,13 +96,23 @@
         return ret;
     };
 
-    Piece.prototype.blockInsidePiece = function(x, y) {
-        return x < this.blocks[0].length
-            && y < this.blocks.length
-            && this.getBlock(x, y);
+    Piece.prototype.moveDown = function() {
+        return this.move(0, 1);
     };
 
-    Piece.prototype.moveDown = function() {
+    Piece.prototype.moveLeft = function() {
+        return this.move(-1, 0);
+    };
+
+    Piece.prototype.moveRight = function() {
+        return this.move(1, 0);
+    }
+
+    Piece.prototype.move = function(dx, dy) {
+        if (!this.canMove(dx, dy)) {
+            return false;
+        }
+
         this.clearCurrentPos();
 
         this.forEachBlock(function(x, y) {
@@ -102,7 +121,8 @@
             }
         }, this);
 
-        this.y++;
+        this.x += dx;
+        this.y += dy
 
         this.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
@@ -111,6 +131,8 @@
         }, this);
 
         this.draw();
+
+        return true;
     };
 
     Piece.prototype.forEachBlock = function(callback, thisValue) {
@@ -134,20 +156,30 @@
         state.currentPiece = p;
         ctx.fillStyle = config.colors[Math.floor(Math.random() * config.colors.length)];
 
-        p.x = Math.floor(Math.random() * 7);
+        p.x = 4;
         p.y = 0;
         p.draw();
-        state.moveTimer = setInterval(dropPiece, 100);
+        state.moveTimer = setInterval(dropPiece, config.dropTimer);
     }
 
     function dropPiece() {
-        if (state.currentPiece.canMoveDown()) {
-            state.currentPiece.moveDown();
-        } else {
+        var moveResult = state.currentPiece.moveDown();
+
+        if (!moveResult) {
             clearInterval(state.moveTimer);
             nextPiece();
         }
     }
+
+    function keyPress(event) {
+        if (event.keyCode === 37) {
+            state.currentPiece.moveLeft();
+        } else if (event.keyCode === 39) {
+            state.currentPiece.moveRight();
+        }
+    }
+
+    window.addEventListener("keydown", keyPress);
 
     state.board = new Board();
     nextPiece();
