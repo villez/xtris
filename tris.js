@@ -5,15 +5,23 @@
 (function () {
     "use strict";
 
+    var c = document.getElementById("c");
+    var ctx = c.getContext("2d");
+    ctx.strokeStyle = "black";
+
     var pieces = [
         [[1, 1], [1, 1]],
         [[1], [1], [1], [1]],
-        [[1, 1]],
-        [[1], [1]]
+        [[0, 1, 0], [1, 1, 1]],
+        [[1, 1, 0], [0, 1, 1]],
+        [[0, 1, 1], [1, 1, 0]]
     ];
 
     var config = {
-        blockSize: 30
+        blockSize: 30,
+        gridWidth: 10,
+        gridHeight: 20,
+        colors: ["green", "blue", "red", "orange"]
     };
 
     var state = {
@@ -21,31 +29,26 @@
         moveTimer: null
     };
 
-    var c = document.getElementById("c");
-    var ctx = c.getContext("2d");
-
-    ctx.fillStyle = "green";
-    ctx.strokeStyle = "black";
 
     function Board() {
-        this.elems = new Array(10 * 20);
-        for (var x = 0; x < 10; x++) {
-            for (var y = 0; y < 20; y++) {
+        this.elems = new Array(config.gridWidth * config.gridHeight);
+        for (var x = 0; x < config.gridWidth; x++) {
+            for (var y = 0; y < config.gridHeight; y++) {
                 this.set(x, y, false);
             }
         }
     }
 
     Board.prototype.get = function(x, y) {
-        return this.elems[x + 20 * y];
+        return this.elems[x + config.gridHeight * y];
     };
 
     Board.prototype.set = function(x, y, value) {
-        this.elems[x + 20 * y] = value;
+        this.elems[x + config.gridHeight * y] = value;
     };
 
     Board.prototype.insideBoard = function(x, y) {
-        return x < 10 && y < 20;
+        return x < config.gridWidth && y < config.gridHeight;
     };
 
 
@@ -55,25 +58,28 @@
         this.blocks = pieces[Math.floor(Math.random() * pieces.length)];
     }
 
+    Piece.prototype.getBlock = function(x, y) {
+        return this.blocks[y][x];
+    };
+
     Piece.prototype.draw = function() {
         var sz = config.blockSize;
 
         this.forEachBlock(function(x, y) {
-            ctx.fillRect(x * sz + 1, y * sz + 1, sz - 2, sz - 2);
-        });
+            if (this.getBlock(x, y)) {
+                ctx.fillRect((this.x + x) * sz + 1, (this.y + y) * sz + 1, sz - 2, sz - 2);
+            }
+        }, this);
     };
 
     Piece.prototype.canMoveDown = function() {
-        return this.eachBlockCanMoveDown();
-    };
-
-    Piece.prototype.eachBlockCanMoveDown = function() {
         var ret = true;
         for (var x = 0; x < this.blocks[0].length; x++) {
             for (var y = 0; y < this.blocks.length; y++) {
-                if (!this.blockInsidePiece(x, y + 1) && (
-                    !state.board.insideBoard(this.x + x, this.y + y + 1) ||
-                    state.board.get(this.x + x, this.y + y + 1))) {
+                if (!this.blockInsidePiece(x, y + 1) &&
+                    this.getBlock(x, y) &&
+                    (!state.board.insideBoard(this.x + x, this.y + y + 1) ||
+                     state.board.get(this.x + x, this.y + y + 1))) {
                     ret = false;
                 }
             }
@@ -82,20 +88,26 @@
     };
 
     Piece.prototype.blockInsidePiece = function(x, y) {
-        return x < this.blocks[0].length && y < this.blocks.length;
+        return x < this.blocks[0].length
+            && y < this.blocks.length
+            && this.getBlock(x, y);
     };
 
     Piece.prototype.moveDown = function() {
         this.clearCurrentPos();
 
         this.forEachBlock(function(x, y) {
-            state.board.set(x, y, false);
+            if (this.getBlock(x, y)) {
+                state.board.set(this.x + x, this.y + y, false);
+            }
         }, this);
 
         this.y++;
 
         this.forEachBlock(function(x, y) {
-            state.board.set(x, y, true);
+            if (this.getBlock(x, y)) {
+                state.board.set(this.x + x, this.y + y, true);
+            }
         }, this);
 
         this.draw();
@@ -104,7 +116,7 @@
     Piece.prototype.forEachBlock = function(callback, thisValue) {
         for (var x = 0; x < this.blocks[0].length; x++) {
             for (var y = 0; y < this.blocks.length; y++) {
-                callback.call(this, this.x + x, this.y + y);
+                callback.call(this, x, y);
             }
         }
     };
@@ -112,7 +124,7 @@
     Piece.prototype.clearCurrentPos = function() {
         var sz = config.blockSize;
         this.forEachBlock(function(x, y) {
-            ctx.clearRect(x * sz, y * sz, sz, sz);
+            ctx.clearRect((this.x + x) * sz, (this.y + y) * sz, sz, sz);
         }, this);
     };
 
@@ -120,8 +132,9 @@
     function nextPiece() {
         var p = new Piece();
         state.currentPiece = p;
+        ctx.fillStyle = config.colors[Math.floor(Math.random() * config.colors.length)];
 
-        p.x = Math.floor(Math.random() * 9);
+        p.x = Math.floor(Math.random() * 7);
         p.y = 0;
         p.draw();
         state.moveTimer = setInterval(dropPiece, 100);
