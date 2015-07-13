@@ -1,5 +1,16 @@
+// Tetris clone in JavaScript, using HTML5 canvas
+//
+// (c) Ville Siltanen, 2015. MIT License
+
 (function () {
     "use strict";
+
+    var pieces = [
+        [[1, 1], [1, 1]],
+        [[1], [1], [1], [1]],
+        [[1, 1]],
+        [[1], [1]]
+    ];
 
     var config = {
         blockSize: 30
@@ -18,6 +29,11 @@
 
     function Board() {
         this.elems = new Array(10 * 20);
+        for (var x = 0; x < 10; x++) {
+            for (var y = 0; y < 20; y++) {
+                this.set(x, y, false);
+            }
+        }
     }
 
     Board.prototype.get = function(x, y) {
@@ -28,37 +44,76 @@
         this.elems[x + 20 * y] = value;
     };
 
+    Board.prototype.insideBoard = function(x, y) {
+        return x < 10 && y < 20;
+    };
+
 
     function Piece(x, y) {
         this.x = x;
         this.y = y;
+        this.blocks = pieces[Math.floor(Math.random() * pieces.length)];
     }
 
     Piece.prototype.draw = function() {
-        var dy = config.blockSize;
-        var dx = config.blockSize;
+        var sz = config.blockSize;
 
-        ctx.fillRect(this.x * config.blockSize + 1, this.y * config.blockSize + 1,
-                     dx-2, dy-2);
-        ctx.strokeRect(this.x * config.blockSize + 1, this.y * config.blockSize + 1,
-                     dx-2, dy-2);
+        this.forEachBlock(function(x, y) {
+            ctx.fillRect(x * sz + 1, y * sz + 1, sz - 2, sz - 2);
+        });
     };
 
     Piece.prototype.canMoveDown = function() {
-        return this.y < 19 && !state.board.get(this.x, this.y + 1);
+        return this.eachBlockCanMoveDown();
+    };
+
+    Piece.prototype.eachBlockCanMoveDown = function() {
+        var ret = true;
+        for (var x = 0; x < this.blocks[0].length; x++) {
+            for (var y = 0; y < this.blocks.length; y++) {
+                if (!this.blockInsidePiece(x, y + 1) && (
+                    !state.board.insideBoard(this.x + x, this.y + y + 1) ||
+                    state.board.get(this.x + x, this.y + y + 1))) {
+                    ret = false;
+                }
+            }
+        }
+        return ret;
+    };
+
+    Piece.prototype.blockInsidePiece = function(x, y) {
+        return x < this.blocks[0].length && y < this.blocks.length;
     };
 
     Piece.prototype.moveDown = function() {
         this.clearCurrentPos();
-        state.board.set(this.x, this.y, false);
+
+        this.forEachBlock(function(x, y) {
+            state.board.set(x, y, false);
+        }, this);
+
         this.y++;
-        state.board.set(this.x, this.y, true);
+
+        this.forEachBlock(function(x, y) {
+            state.board.set(x, y, true);
+        }, this);
+
         this.draw();
     };
 
+    Piece.prototype.forEachBlock = function(callback, thisValue) {
+        for (var x = 0; x < this.blocks[0].length; x++) {
+            for (var y = 0; y < this.blocks.length; y++) {
+                callback.call(this, this.x + x, this.y + y);
+            }
+        }
+    };
+
     Piece.prototype.clearCurrentPos = function() {
-        ctx.clearRect(this.x * config.blockSize, this.y * config.blockSize,
-                      config.blockSize, config.blockSize);
+        var sz = config.blockSize;
+        this.forEachBlock(function(x, y) {
+            ctx.clearRect(x * sz, y * sz, sz, sz);
+        }, this);
     };
 
 
@@ -66,7 +121,7 @@
         var p = new Piece();
         state.currentPiece = p;
 
-        p.x = Math.floor(Math.random() * 10);
+        p.x = Math.floor(Math.random() * 9);
         p.y = 0;
         p.draw();
         state.moveTimer = setInterval(dropPiece, 100);
