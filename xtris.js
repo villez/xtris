@@ -24,7 +24,7 @@
         gridWidth: 10,
         gridHeight: 20,
         colors: ["green", "blue", "red", "orange"],
-        dropTimer: 300  // milliseconds
+        dropTimer: 250  // milliseconds
     };
 
     var state = {
@@ -38,7 +38,7 @@
         this.elems = new Array(config.gridWidth * config.gridHeight);
         for (var x = 0; x < config.gridWidth; x++) {
             for (var y = 0; y < config.gridHeight; y++) {
-                this.set(x, y, false);
+                this.set(x, y, null);
             }
         }
     }
@@ -55,10 +55,46 @@
         return x >= 0 && y >= 0 && x < config.gridWidth && y < config.gridHeight;
     };
 
+    Board.prototype.placePiece = function(piece) {
+        var status = true;
 
-    function Piece(x, y) {
+        for (var x = 0; x < piece.blocks[0].length; x++) {
+            for (var y = 0; y < piece.blocks.length; y++) {
+                if (piece.getBlock(x, y)) {
+                    if (state.board.get(piece.x + x, piece.y + y) !== null) {
+                        status = false;
+                    } else {
+                        state.board.set(piece.x + x, piece.y + y, this.color);
+                    }
+                }
+            }
+        }
+
+        return status;
+    };
+
+    Board.prototype.draw = function() {
+        var block;
+        var sz = config.blockSize;
+
+        for (var x = 0; x < config.gridWidth; x++) {
+            for (var y = 0; y < config.gridHeight; y++) {
+                block = this.get(x, y);
+                if (block !== null) {
+                    ctx.fillStyle = block;
+                    ctx.fillRect(x * sz + 1, y * sz + 1, sz - 2, sz - 2);
+                } else {
+                    ctx.clearRect(x * sz, y * sz, sz, sz);
+                }
+            }
+        }
+    }
+
+
+    function Piece(x, y, color) {
         this.x = x;
         this.y = y;
+        this.color = color;
         this.blocks = pieces[Math.floor(Math.random() * pieces.length)];
     }
 
@@ -66,32 +102,10 @@
         return this.blocks[y][x];
     };
 
-    Piece.prototype.draw = function() {
-        var sz = config.blockSize;
-
-        this.forEachBlock(function(x, y) {
-            if (this.getBlock(x, y)) {
-                ctx.fillRect((this.x + x) * sz + 1, (this.y + y) * sz + 1, sz - 2, sz - 2);
-            }
-        }, this);
-    };
-
     Piece.prototype.blockInsidePiece = function(x, y) {
         return x < this.blocks[0].length
             && y < this.blocks.length
             && this.getBlock(x, y);
-    };
-
-    Piece.prototype.canDraw = function() {
-        for (var x = 0; x < this.blocks[0].length; x++) {
-            for (var y = 0; y < this.blocks.length; y++) {
-                if (state.board.get(this.x + x, this.y + y)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     };
 
     Piece.prototype.canMove = function(dx, dy) {
@@ -126,11 +140,9 @@
             return false;
         }
 
-        this.clearCurrentPos();
-
         this.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
-                state.board.set(this.x + x, this.y + y, false);
+                state.board.set(this.x + x, this.y + y, null);
             }
         }, this);
 
@@ -139,30 +151,25 @@
 
         this.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
-                state.board.set(this.x + x, this.y + y, true);
+                state.board.set(this.x + x, this.y + y, this.color);
             }
         }, this);
-
-        this.draw();
 
         return true;
     };
 
     Piece.prototype.forEachBlock = function(callback, thisValue) {
+        var T;
+
+        if (arguments.length > 1) {
+            T = thisValue;
+        }
+
         for (var x = 0; x < this.blocks[0].length; x++) {
             for (var y = 0; y < this.blocks.length; y++) {
-                callback.call(this, x, y);
+                callback.call(T, x, y);
             }
         }
-    };
-
-    Piece.prototype.clearCurrentPos = function() {
-        var sz = config.blockSize;
-        this.forEachBlock(function(x, y) {
-            if (this.getBlock(x, y)) {
-                ctx.clearRect((this.x + x) * sz, (this.y + y) * sz, sz, sz);
-            }
-        }, this);
     };
 
 
@@ -170,18 +177,13 @@
     game.running = false,
 
     game.nextPiece = function() {
-        var p = new Piece();
+        var p = new Piece(4, 0, config.colors[Math.floor(Math.random() * config.colors.length)]);
         state.currentPiece = p;
-        ctx.fillStyle = config.colors[Math.floor(Math.random() * config.colors.length)];
 
-        p.x = 4;
-        p.y = 0;
-
-        if (p.canDraw()) {
-            p.draw();
+        if (state.board.placePiece(p)) {
+            state.board.draw();
             state.moveTimer = setInterval(game.dropPiece, config.dropTimer);
         } else {
-            console.log("Game over!");
             game.running = false;
             clearInterval(state.moveTimer);
             game.currentPiece = null;
@@ -193,6 +195,7 @@
             clearInterval(state.moveTimer);
             game.nextPiece();
         }
+        state.board.draw();
     }
 
     game.keyPress = function(event) {
@@ -202,8 +205,10 @@
 
         if (event.keyCode === 37) {
             state.currentPiece.moveLeft();
+            state.board.draw();
         } else if (event.keyCode === 39) {
             state.currentPiece.moveRight();
+            state.board.draw();
         }
     }
 
