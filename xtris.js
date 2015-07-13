@@ -11,7 +11,7 @@
 
     var PIECES = [
         [
-            [[1, 1], [1, 1]],
+            [[1, 1], [1, 1]]
         ],
         [
             [[1], [1], [1], [1]],
@@ -158,7 +158,7 @@
                 }
             }
         }
-    }
+    };
 
 
     function Piece(x, y, color) {
@@ -206,7 +206,7 @@
 
     Piece.prototype.moveRight = function() {
         return this.move(1, 0);
-    }
+    };
 
     Piece.prototype.move = function(dx, dy) {
         if (!this.canMove(dx, dy)) {
@@ -220,7 +220,7 @@
         }, this);
 
         this.x += dx;
-        this.y += dy
+        this.y += dy;
 
         this.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
@@ -307,7 +307,7 @@
 
 
     var game = {};
-    game.running = false,
+    game.running = false;
 
     game.nextPiece = function() {
         var p = new Piece(4, 0, config.colors[Math.floor(Math.random() * config.colors.length)]);
@@ -332,24 +332,30 @@
             game.nextPiece();
         }
         state.board.draw();
-    }
+    };
 
     game.keyPress = function(event) {
         if (!game.running) {
             return;
         }
 
-        if (event.keyCode === 37) {
+        switch(event.keyCode) {
+        case 37:
             state.currentPiece.moveLeft();
             state.board.draw();
-        } else if (event.keyCode === 39) {
-            state.currentPiece.moveRight();
-            state.board.draw();
-        } else if (event.keyCode === 38) {
+            break;
+        case 38:
             state.currentPiece.rotate();
             state.board.draw();
+            break;
+        case 39:
+            state.currentPiece.moveRight();
+            state.board.draw();
+            break;
+        default:
+            // no other keys handled at the moment
         }
-    }
+    };
 
     window.addEventListener("keydown", game.keyPress);
 
