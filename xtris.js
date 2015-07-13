@@ -80,6 +80,17 @@
             && this.getBlock(x, y);
     };
 
+    Piece.prototype.canDraw = function() {
+        for (var x = 0; x < this.blocks[0].length; x++) {
+            for (var y = 0; y < this.blocks.length; y++) {
+                if (state.board.get(this.x + x, this.y + y)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    };
 
     Piece.prototype.canMove = function(dx, dy) {
         var ret = true;
@@ -151,27 +162,40 @@
     };
 
 
-    function nextPiece() {
+    var game = {};
+    game.running = false,
+
+    game.nextPiece = function() {
         var p = new Piece();
         state.currentPiece = p;
         ctx.fillStyle = config.colors[Math.floor(Math.random() * config.colors.length)];
 
         p.x = 4;
         p.y = 0;
-        p.draw();
-        state.moveTimer = setInterval(dropPiece, config.dropTimer);
-    }
 
-    function dropPiece() {
-        var moveResult = state.currentPiece.moveDown();
-
-        if (!moveResult) {
+        if (p.canDraw()) {
+            p.draw();
+            state.moveTimer = setInterval(game.dropPiece, config.dropTimer);
+        } else {
+            console.log("Game over!");
+            game.running = false;
             clearInterval(state.moveTimer);
-            nextPiece();
+            game.currentPiece = null;
+        }
+    };
+
+    game.dropPiece = function() {
+        if (!state.currentPiece.moveDown()) {
+            clearInterval(state.moveTimer);
+            game.nextPiece();
         }
     }
 
-    function keyPress(event) {
+    game.keyPress = function(event) {
+        if (!game.running) {
+            return;
+        }
+
         if (event.keyCode === 37) {
             state.currentPiece.moveLeft();
         } else if (event.keyCode === 39) {
@@ -179,9 +203,10 @@
         }
     }
 
-    window.addEventListener("keydown", keyPress);
+    window.addEventListener("keydown", game.keyPress);
 
     state.board = new Board();
-    nextPiece();
+    game.running = true;
+    game.nextPiece();
 
 }());
