@@ -124,18 +124,24 @@
             return false;
         }
 
-        for (var x = 0; x < piece.blocks[0].length; x++) {
-            for (var y = 0; y < piece.blocks.length; y++) {
-                if (piece.getBlock(x, y)) {
-                    state.board.set(piece.x + x, piece.y + y, {
-                        color: piece.color,
-                        active: true
-                    });
-                }
+        piece.forEachBlock(function(x, y) {
+            if (this.getBlock(x, y)) {
+                state.board.set(piece.x + x, piece.y + y, {
+                    color: piece.color,
+                    active: true
+                });
             }
-        }
+        }, piece);
 
         return true;
+    };
+
+    Board.prototype.clearPiece = function(piece) {
+        piece.forEachBlock(function(x, y) {
+            if (this.getBlock(x, y)) {
+                state.board.set(this.x + x, this.y + y, null);
+            }
+        }, piece);
     };
 
     Board.prototype.draw = function() {
@@ -213,23 +219,12 @@
             return false;
         }
 
-        this.forEachBlock(function(x, y) {
-            if (this.getBlock(x, y)) {
-                state.board.set(this.x + x, this.y + y, null);
-            }
-        }, this);
+        state.board.clearPiece(this);
 
         this.x += dx;
         this.y += dy;
 
-        this.forEachBlock(function(x, y) {
-            if (this.getBlock(x, y)) {
-                state.board.set(this.x + x, this.y + y, {
-                    color: this.color,
-                    active: true
-                });
-            }
-        }, this);
+        state.board.placePiece(this);
 
         return true;
     };
