@@ -287,6 +287,7 @@
     };
 
 
+
     var game = {};
     game.running = false;
 
@@ -306,13 +307,26 @@
 
     game.dropPiece = function() {
         if (!state.currentPiece.moveDown()) {
-            clearInterval(state.moveTimer);
-            state.currentPiece.setInPlace();
-            state.board.checkFullRows();
-            state.board.draw();
-            game.nextPiece();
+            game.pieceFinished();
         }
         state.board.draw();
+    };
+
+    game.dropPieceAllTheWay = function() {
+        while (true) {
+            if (!state.currentPiece.moveDown()) {
+                break;
+            }
+        }
+        game.pieceFinished();
+    };
+
+    game.pieceFinished = function() {
+        clearInterval(state.moveTimer);
+        state.currentPiece.setInPlace();
+        state.board.checkFullRows();
+        state.board.draw();
+        game.nextPiece();
     };
 
     game.keyPress = function(event) {
@@ -331,6 +345,10 @@
             break;
         case 39:
             state.currentPiece.moveRight();
+            state.board.draw();
+            break;
+        case 40:
+            game.dropPieceAllTheWay();
             state.board.draw();
             break;
         default:

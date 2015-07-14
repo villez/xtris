@@ -11,8 +11,6 @@ requires a "modern" browser. Exact versions not checked.
 
 ## TODO
 
-* make the restart button work
-* dropping blocks all the way down when they're active with the down arrow
 * pausing the game
 * scoring games - counting points
 * speeding up the game as it progresses
