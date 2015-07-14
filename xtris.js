@@ -186,10 +186,9 @@
         this.x = x;
         this.y = y;
         this.color = color;
-        this.pieceIdx = Math.floor(Math.random() * PIECES.length);
-        this.blocks = PIECES[this.pieceIdx][0];
-
+        this.piece = PIECES[Math.floor(Math.random() * PIECES.length)];
         this.rotationIndex = 0;
+        this.blocks = this.piece[this.rotationIndex];
     }
 
     Piece.prototype.getBlock = function(x, y) {
@@ -250,8 +249,8 @@
             }
         }, this);
 
-        this.rotationIndex = (this.rotationIndex + 1) % PIECES[this.pieceIdx].length;
-        this.blocks = PIECES[this.pieceIdx][this.rotationIndex];
+        this.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
+        this.blocks = this.piece[this.rotationIndex];
 
         this.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
@@ -265,8 +264,8 @@
 
     Piece.prototype.canRotate = function() {
         var ret = true;
-        var newRotationIndex = (this.rotationIndex + 1) % PIECES[this.pieceIdx].length;
-        var rotatedBlocks = PIECES[this.pieceIdx][newRotationIndex];
+        var newRotationIndex = (this.rotationIndex + 1) % this.piece.length;
+        var rotatedBlocks = this.piece[newRotationIndex];
 
         return state.board.canPlace(rotatedBlocks, this.x, this.y);
     };
