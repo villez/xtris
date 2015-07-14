@@ -338,10 +338,16 @@
         }
     };
 
-    window.addEventListener("keydown", game.keyPress);
+    game.restart = function() {
+        document.getElementById("restart").innerHTML = "Restart";
+        clearInterval(state.moveTimer);
+        state.board = new Board();
+        game.running = true;
+        game.nextPiece();
+    };
 
-    state.board = new Board();
-    game.running = true;
-    game.nextPiece();
+    window.addEventListener("keydown", game.keyPress);
+    document.getElementById("restart").addEventListener("click", game.restart);
+
 
 }());
