@@ -123,24 +123,23 @@
     };
 
     Board.prototype.placePiece = function(piece) {
-        var status = true;
+
+        if (!this.canPlace(piece.blocks, piece.x, piece.y)) {
+            return false;
+        }
 
         for (var x = 0; x < piece.blocks[0].length; x++) {
             for (var y = 0; y < piece.blocks.length; y++) {
                 if (piece.getBlock(x, y)) {
-                    if (state.board.get(piece.x + x, piece.y + y) !== null) {
-                        status = false;
-                    } else {
-                        state.board.set(piece.x + x, piece.y + y, {
-                            color: piece.color,
-                            active: true
-                        });
-                    }
+                    state.board.set(piece.x + x, piece.y + y, {
+                        color: piece.color,
+                        active: true
+                    });
                 }
             }
         }
 
-        return status;
+        return true;
     };
 
     Board.prototype.draw = function() {
@@ -160,6 +159,28 @@
         }
     };
 
+    Board.prototype.canPlace = function(blocks, px, py) {
+        var gridBlock;
+        var ret = true;
+        for (var x = 0; x < blocks[0].length; x++) {
+            for (var y = 0; y < blocks.length; y++) {
+                if (blocks[y][x]) {
+                    if (!state.board.insideBoard(px + x, py + y)) {
+                        ret = false;
+                    } else {
+                        gridBlock = state.board.get(px + x, py + y);
+                        if (gridBlock && !gridBlock.active) {
+                            ret = false;
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
+
+    };
+
+
 
     function Piece(x, y, color) {
         this.x = x;
@@ -175,26 +196,10 @@
         return this.blocks[y][x];
     };
 
-    Piece.prototype.blockInsidePiece = function(x, y) {
-        return x < this.blocks[0].length
-            && y < this.blocks.length
-            && this.getBlock(x, y);
+    Piece.prototype.canMove = function(dx, dy) {
+        return state.board.canPlace(this.blocks, this.x + dx, this.y + dy);
     };
 
-    Piece.prototype.canMove = function(dx, dy) {
-        var ret = true;
-        for (var x = 0; x < this.blocks[0].length; x++) {
-            for (var y = 0; y < this.blocks.length; y++) {
-                if (!this.blockInsidePiece(x + dx, y + dy) &&
-                    this.getBlock(x, y) &&
-                    (!state.board.insideBoard(this.x + x + dx, this.y + y + dy) ||
-                     state.board.get(this.x + x + dx, this.y + y + dy))) {
-                    ret = false;
-                }
-            }
-        }
-        return ret;
-    };
 
     Piece.prototype.moveDown = function() {
         return this.move(0, 1);
@@ -259,25 +264,11 @@
     };
 
     Piece.prototype.canRotate = function() {
-        var gridBlock;
         var ret = true;
         var newRotationIndex = (this.rotationIndex + 1) % PIECES[this.pieceIdx].length;
-        var newBlocks = PIECES[this.pieceIdx][newRotationIndex];
+        var rotatedBlocks = PIECES[this.pieceIdx][newRotationIndex];
 
-        for (var x = 0; x < newBlocks[0].length; x++) {
-            for (var y = 0; y < newBlocks.length; y++) {
-                if (!state.board.insideBoard(this.x + x, this.y + y)) {
-                    ret = false;
-                } else {
-                    gridBlock = state.board.get(this.x + x, this.y + y);
-                    if (gridBlock && !gridBlock.active) {
-                        ret = false;
-                    }
-                }
-            }
-        }
-
-        return ret;
+        return state.board.canPlace(rotatedBlocks, this.x, this.y);
     };
 
     Piece.prototype.forEachBlock = function(callback, thisValue) {
