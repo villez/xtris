@@ -119,7 +119,6 @@
     };
 
     Board.prototype.placePiece = function(piece) {
-
         if (!this.canPlace(piece.blocks, piece.x, piece.y)) {
             return false;
         }
@@ -178,11 +177,9 @@
                 }
             }
         }
+
         return ret;
-
     };
-
-
 
     function Piece(x, y, color) {
         this.x = x;
@@ -200,7 +197,6 @@
     Piece.prototype.canMove = function(dx, dy) {
         return state.board.canPlace(this.blocks, this.x + dx, this.y + dy);
     };
-
 
     Piece.prototype.moveDown = function() {
         return this.move(0, 1);
@@ -234,27 +230,15 @@
             return false;
         }
 
-        this.forEachBlock(function(x, y) {
-            if (this.getBlock(x, y)) {
-                state.board.set(this.x + x, this.y + y, null);
-            }
-        }, this);
+        state.board.clearPiece(this);
 
         this.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
         this.blocks = this.piece[this.rotationIndex];
 
-        this.forEachBlock(function(x, y) {
-            if (this.getBlock(x, y)) {
-                state.board.set(this.x + x, this.y + y, {
-                    color: this.color,
-                    active: true
-                });
-            }
-        }, this);
+        state.board.placePiece(this);
     };
 
     Piece.prototype.canRotate = function() {
-        var ret = true;
         var newRotationIndex = (this.rotationIndex + 1) % this.piece.length;
         var rotatedBlocks = this.piece[newRotationIndex];
 
@@ -313,11 +297,11 @@
     };
 
     game.dropPieceAllTheWay = function() {
-        while (true) {
-            if (!state.currentPiece.moveDown()) {
-                break;
-            }
+        while (state.currentPiece.moveDown()) {
+            // empty on purpose - just keep calling moveDown() on
+            // the piece until it returns false
         }
+
         game.pieceFinished();
     };
 
