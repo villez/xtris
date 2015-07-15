@@ -270,7 +270,7 @@
         board: null,
         moveTimer: null,
         currentPiece: null,
-        running: false
+        status: "stopped"
     };
 
     game.nextPiece = function() {
@@ -281,7 +281,7 @@
             game.board.draw();
             game.moveTimer = setInterval(game.dropPiece, config.dropTimer);
         } else {
-            game.running = false;
+            game.status = "stopped";
             clearInterval(game.moveTimer);
             game.currentPiece = null;
         }
@@ -312,29 +312,55 @@
     };
 
     game.keyPress = function(event) {
-        if (!game.running) {
+        if (game.status === "stopped") {
             return;
         }
 
         switch(event.keyCode) {
-        case 37:
-            game.currentPiece.moveLeft();
-            game.board.draw();
-            break;
-        case 38:
-            game.currentPiece.rotate();
-            game.board.draw();
-            break;
-        case 39:
-            game.currentPiece.moveRight();
-            game.board.draw();
-            break;
+        case 37: // intentional fall-through for 37-40
+        case 38: // feeding all arrow key presses to the
+        case 39: // same separate function
         case 40:
-            game.dropPieceAllTheWay();
-            game.board.draw();
+            if (game.status === "running") {  // no arrow key functionality if paused
+                game.arrowKeyPress(event.keyCode);
+            }
+            break;
+        case 80:
+            game.togglePause();
             break;
         default:
             // no other keys handled at the moment
+        }
+    };
+
+    game.arrowKeyPress = function(keyCode) {
+        switch(keyCode) {
+        case 37: // left
+            game.currentPiece.moveLeft();
+            game.board.draw();
+            break;
+        case 38: // up
+            game.currentPiece.rotate();
+            game.board.draw();
+            break;
+        case 39: // right
+            game.currentPiece.moveRight();
+            game.board.draw();
+            break;
+        case 40: // down
+            game.dropPieceAllTheWay();
+            game.board.draw();
+            break;
+        }
+    };
+
+    game.togglePause = function() {
+        if (game.status === "paused") {
+            game.status = "running";
+            game.moveTimer = setInterval(game.dropPiece, config.dropTimer);
+        } else if (game.status === "running") {
+            game.status = "paused";
+            clearInterval(game.moveTimer);
         }
     };
 
@@ -342,7 +368,7 @@
         document.getElementById("restart").innerHTML = "Restart";
         clearInterval(game.moveTimer);
         game.board = new Board();
-        game.running = true;
+        game.status = "running";
         game.nextPiece();
     };
 
