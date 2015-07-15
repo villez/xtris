@@ -158,14 +158,16 @@
         var ret = true;
         for (var x = 0; x < blocks[0].length; x++) {
             for (var y = 0; y < blocks.length; y++) {
-                if (blocks[y][x]) {
-                    if (!game.board.insideBoard(px + x, py + y)) {
+                if (!blocks[y][x]) {
+                    continue;
+                }
+
+                if (!game.board.insideBoard(px + x, py + y)) {
+                    ret = false;
+                } else {
+                    gridBlock = game.board.get(px + x, py + y);
+                    if (gridBlock && !gridBlock.active) {
                         ret = false;
-                    } else {
-                        gridBlock = game.board.get(px + x, py + y);
-                        if (gridBlock && !gridBlock.active) {
-                            ret = false;
-                        }
                     }
                 }
             }
