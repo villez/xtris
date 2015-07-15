@@ -53,13 +53,6 @@
         dropTimer: 250  // milliseconds
     };
 
-    var state = {
-        board: null,
-        currentPiece: null,
-        moveTimer: null
-    };
-
-
     function Board() {
         this.elems = [];
         for (var row = 0; row < config.gridHeight; row++) {
@@ -105,7 +98,7 @@
         var i, j, emptyRow;
 
         for (i = 0; i < indexes.length; i++) {
-            state.board.elems.splice(indexes[i], 1);
+            game.board.elems.splice(indexes[i], 1);
         }
 
         for (i = 0; i < indexes.length; i++) {
@@ -114,7 +107,7 @@
                 emptyRow[j] = null;
             }
 
-            state.board.elems.unshift(emptyRow);
+            game.board.elems.unshift(emptyRow);
         }
     };
 
@@ -125,7 +118,7 @@
 
         piece.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
-                state.board.set(piece.x + x, piece.y + y, {
+                game.board.set(piece.x + x, piece.y + y, {
                     color: piece.color,
                     active: true
                 });
@@ -138,7 +131,7 @@
     Board.prototype.clearPiece = function(piece) {
         piece.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
-                state.board.set(this.x + x, this.y + y, null);
+                game.board.set(this.x + x, this.y + y, null);
             }
         }, piece);
     };
@@ -166,10 +159,10 @@
         for (var x = 0; x < blocks[0].length; x++) {
             for (var y = 0; y < blocks.length; y++) {
                 if (blocks[y][x]) {
-                    if (!state.board.insideBoard(px + x, py + y)) {
+                    if (!game.board.insideBoard(px + x, py + y)) {
                         ret = false;
                     } else {
-                        gridBlock = state.board.get(px + x, py + y);
+                        gridBlock = game.board.get(px + x, py + y);
                         if (gridBlock && !gridBlock.active) {
                             ret = false;
                         }
@@ -195,7 +188,7 @@
     };
 
     Piece.prototype.canMove = function(dx, dy) {
-        return state.board.canPlace(this.blocks, this.x + dx, this.y + dy);
+        return game.board.canPlace(this.blocks, this.x + dx, this.y + dy);
     };
 
     Piece.prototype.moveDown = function() {
@@ -215,12 +208,12 @@
             return false;
         }
 
-        state.board.clearPiece(this);
+        game.board.clearPiece(this);
 
         this.x += dx;
         this.y += dy;
 
-        state.board.placePiece(this);
+        game.board.placePiece(this);
 
         return true;
     };
@@ -230,19 +223,19 @@
             return false;
         }
 
-        state.board.clearPiece(this);
+        game.board.clearPiece(this);
 
         this.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
         this.blocks = this.piece[this.rotationIndex];
 
-        state.board.placePiece(this);
+        game.board.placePiece(this);
     };
 
     Piece.prototype.canRotate = function() {
         var newRotationIndex = (this.rotationIndex + 1) % this.piece.length;
         var rotatedBlocks = this.piece[newRotationIndex];
 
-        return state.board.canPlace(rotatedBlocks, this.x, this.y);
+        return game.board.canPlace(rotatedBlocks, this.x, this.y);
     };
 
     Piece.prototype.forEachBlock = function(callback, thisValue) {
@@ -262,7 +255,7 @@
     Piece.prototype.setInPlace = function() {
         this.forEachBlock(function(x, y) {
             if (this.getBlock(x, y) !== 0) {
-                state.board.set(this.x + x, this.y + y, {
+                game.board.set(this.x + x, this.y + y, {
                     color: this.color,
                     active: false
                 });
@@ -271,33 +264,36 @@
     };
 
 
-
-    var game = {};
-    game.running = false;
+    var game = {
+        board: null,
+        moveTimer: null,
+        currentPiece: null,
+        running: false
+    };
 
     game.nextPiece = function() {
         var p = new Piece(4, 0, config.colors[Math.floor(Math.random() * config.colors.length)]);
-        state.currentPiece = p;
+        game.currentPiece = p;
 
-        if (state.board.placePiece(p)) {
-            state.board.draw();
-            state.moveTimer = setInterval(game.dropPiece, config.dropTimer);
+        if (game.board.placePiece(p)) {
+            game.board.draw();
+            game.moveTimer = setInterval(game.dropPiece, config.dropTimer);
         } else {
             game.running = false;
-            clearInterval(state.moveTimer);
+            clearInterval(game.moveTimer);
             game.currentPiece = null;
         }
     };
 
     game.dropPiece = function() {
-        if (!state.currentPiece.moveDown()) {
+        if (!game.currentPiece.moveDown()) {
             game.pieceFinished();
         }
-        state.board.draw();
+        game.board.draw();
     };
 
     game.dropPieceAllTheWay = function() {
-        while (state.currentPiece.moveDown()) {
+        while (game.currentPiece.moveDown()) {
             // empty on purpose - just keep calling moveDown() on
             // the piece until it returns false
         }
@@ -306,10 +302,10 @@
     };
 
     game.pieceFinished = function() {
-        clearInterval(state.moveTimer);
-        state.currentPiece.setInPlace();
-        state.board.checkFullRows();
-        state.board.draw();
+        clearInterval(game.moveTimer);
+        game.currentPiece.setInPlace();
+        game.board.checkFullRows();
+        game.board.draw();
         game.nextPiece();
     };
 
@@ -320,20 +316,20 @@
 
         switch(event.keyCode) {
         case 37:
-            state.currentPiece.moveLeft();
-            state.board.draw();
+            game.currentPiece.moveLeft();
+            game.board.draw();
             break;
         case 38:
-            state.currentPiece.rotate();
-            state.board.draw();
+            game.currentPiece.rotate();
+            game.board.draw();
             break;
         case 39:
-            state.currentPiece.moveRight();
-            state.board.draw();
+            game.currentPiece.moveRight();
+            game.board.draw();
             break;
         case 40:
             game.dropPieceAllTheWay();
-            state.board.draw();
+            game.board.draw();
             break;
         default:
             // no other keys handled at the moment
@@ -342,8 +338,8 @@
 
     game.restart = function() {
         document.getElementById("restart").innerHTML = "Restart";
-        clearInterval(state.moveTimer);
-        state.board = new Board();
+        clearInterval(game.moveTimer);
+        game.board = new Board();
         game.running = true;
         game.nextPiece();
     };
