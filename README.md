@@ -12,6 +12,13 @@ with up arrow. Drop the piece all the way down with the down arrow.
 
 You can pause the game, and restart again, with the P key. 
 
+The scoring mechanism is currently simplistic - 10 points for each
+piece that gets placed, and 100 points for a cleared row. This could
+be made arbitrarily more complex, e.g. rewarding stuff like clearing more than
+one row at a time, dropping pieces a long distance, etc. Not currently
+planning to dive deep into it, however, as this is more or less a toy
+program.
+
 
 ## Requirements
 
@@ -21,11 +28,11 @@ requires a "modern" browser. Exact versions not checked.
 
 ## TODO
 
-* scoring games - counting points
 * speeding up the game as it progresses
 * UI polishing
 * storing high scores
 
 
+## Copyright and License
 
 (c) Ville Siltanen, 2015. MIT License

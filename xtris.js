@@ -94,6 +94,8 @@
             }
         });
 
+        game.score += (fullRowIndexes.length * 100);
+
         this.removeRows(fullRowIndexes);
     };
 
@@ -311,7 +313,8 @@
         board: null,
         moveTimer: null,
         currentPiece: null,
-        status: "stopped"
+        status: "stopped",
+        score: 0
     };
 
     game.nextPiece = function() {
@@ -349,7 +352,9 @@
     game.pieceFinished = function() {
         clearInterval(game.moveTimer);
         game.currentPiece.setInPlace();
+        game.score += 10;
         game.board.checkFullRows();
+        game.updateScore();
         game.board.draw();
         game.nextPiece();
     };
@@ -398,10 +403,16 @@
         }
     };
 
+    game.updateScore = function() {
+        document.getElementsByClassName("game-score")[0].innerHTML = game.score;
+    };
+
     game.restart = function() {
         clearInterval(game.moveTimer);
         game.board = new Board();
         game.status = "running";
+        game.score = 0;
+        game.updateScore();
         game.nextPiece();
     };
 
