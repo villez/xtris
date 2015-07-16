@@ -51,8 +51,12 @@
         gridHeight: 20,
         colors: ["green", "blue", "red", "orange"],
         dropTimer: 250,  // milliseconds
+        font: "40px sans-serif",
+        textColor: "black",
         pausedText: "PAUSED",
-        pausedFont: "40px sans-serif"
+        pausedOverlayColor: "rgba(200, 200, 200, 1)",
+        gameOverText: "GAME OVER",
+        gameOverOverlayColor: "rgba(200, 200, 200, 0.5)"
     };
 
     function Board() {
@@ -142,6 +146,12 @@
         var gridBlock;
         var sz = config.blockSize;
 
+        // stop drawing if the game has been stopped in order not to
+        // draw over e.g. the game over text etc.
+        if (game.status === "stopped") {
+            return;
+        }
+
         for (var x = 0; x < config.gridWidth; x++) {
             for (var y = 0; y < config.gridHeight; y++) {
                 gridBlock = this.get(x, y);
@@ -179,21 +189,32 @@
     };
 
     Board.prototype.drawPauseOverlay = function() {
-        var textX, textY;
-
-        ctx.fillStyle = "#dddddd";
+        ctx.fillStyle = config.pausedOverlayColor;
         ctx.fillRect(0, 0, c.width, c.height);
-        ctx.fillStyle = "black";
-        ctx.font = config.pausedFont;
-        // centering the text horizontally based on its actual size
-        textX = (c.width - ctx.measureText(config.pausedText).width) / 2;
-        textY = (c.height / 2);
-        ctx.fillText(config.pausedText, textX, textY);
+
+        this.drawCenteredText(config.pausedText);
     };
 
     Board.prototype.clearPauseOverlay = function() {
         ctx.clearRect(0, 0, c.width, c.height);
         this.draw();
+    };
+
+    Board.prototype.drawGameOver = function() {
+        ctx.fillStyle = config.gameOverOverlayColor;
+        ctx.fillRect(0, 0, c.width, c.height);
+        this.drawCenteredText(config.gameOverText);
+    };
+
+    Board.prototype.drawCenteredText = function(text) {
+        var textX, textY;
+
+        ctx.fillStyle = config.textColor;
+        ctx.font = config.font;
+        // centering the text horizontally based on its actual size
+        textX = (c.width - ctx.measureText(text).width) / 2;
+        textY = (c.height / 2);  // vertically just approximately centered
+        ctx.fillText(text, textX, textY);
     };
 
     function Piece(x, y, color) {
@@ -301,9 +322,11 @@
             game.board.draw();
             game.moveTimer = setInterval(game.dropPiece, config.dropTimer);
         } else {
+            // cannot place the new piece -> game over
             game.status = "stopped";
             clearInterval(game.moveTimer);
             game.currentPiece = null;
+            game.board.drawGameOver();
         }
     };
 
