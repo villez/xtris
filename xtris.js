@@ -50,7 +50,9 @@
         gridWidth: 10,
         gridHeight: 20,
         colors: ["green", "blue", "red", "orange"],
-        dropTimer: 250  // milliseconds
+        dropTimer: 250,  // milliseconds
+        pausedText: "PAUSED",
+        pausedFont: "40px sans-serif"
     };
 
     function Board() {
@@ -174,6 +176,24 @@
         }
 
         return ret;
+    };
+
+    Board.prototype.drawPauseOverlay = function() {
+        var textX, textY;
+
+        ctx.fillStyle = "#dddddd";
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.fillStyle = "black";
+        ctx.font = config.pausedFont;
+        // centering the text horizontally based on its actual size
+        textX = (c.width - ctx.measureText(config.pausedText).width) / 2;
+        textY = (c.height / 2);
+        ctx.fillText(config.pausedText, textX, textY);
+    };
+
+    Board.prototype.clearPauseOverlay = function() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        this.draw();
     };
 
     function Piece(x, y, color) {
@@ -341,12 +361,16 @@
             event.keyCode === 112 ||
             event.keyCode === 80) {
 
+            // note: if game.status === "stopped", do nothing
+
             if (game.status === "paused") {
                 game.status = "running";
                 game.moveTimer = setInterval(game.dropPiece, config.dropTimer);
+                game.board.clearPauseOverlay();
             } else if (game.status === "running") {
                 game.status = "paused";
                 clearInterval(game.moveTimer);
+                game.board.drawPauseOverlay();
             }
         }
     };
