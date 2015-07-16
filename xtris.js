@@ -54,7 +54,7 @@
         font: "40px sans-serif",
         textColor: "black",
         pausedText: "PAUSED",
-        pausedOverlayColor: "rgba(200, 200, 200, 1)",
+        pausedOverlayColor: "#f0f0f0",
         gameOverText: "GAME OVER",
         gameOverOverlayColor: "rgba(200, 200, 200, 0.5)"
     };
@@ -399,7 +399,6 @@
     };
 
     game.restart = function() {
-        document.getElementById("restart").innerHTML = "Restart";
         clearInterval(game.moveTimer);
         game.board = new Board();
         game.status = "running";

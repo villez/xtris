@@ -6,12 +6,26 @@
   </head>
   <body>
     <div id="main">
-      <div id="game">
+      <div class="game-main">
         <canvas width="300" height="600" id="c"></canvas>
       </div>
 
-      <div id="controls">
-        <button id="restart">Start</button>
+      <div class="game-sidebar">
+        Score:
+        <div class="game-score">
+          0
+        </div>
+
+        <div class="instructions">
+          <p>Use the left & right arrow keys to move the falling pieces.
+            Up arrow rotates the piece. Down arrow drops the piece all the way.
+          </p>
+          <p>
+            The <strong>P</strong> key pauses the game.
+          </p>
+        </div>
+
+        <button id="restart">New Game</button>
       </div>
     </div>
 
