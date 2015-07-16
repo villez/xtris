@@ -19,6 +19,10 @@ one row at a time, dropping pieces a long distance, etc. Not currently
 planning to dive deep into it, however, as this is more or less a toy
 program.
 
+The game speeds up slowly as it progresses. The algorithm for this is
+also very simplistic at the moment: every time a row is cleared, the
+dropping of the pieces happens a few milliseconds faster.
+
 
 ## Requirements
 
@@ -28,7 +32,6 @@ requires a "modern" browser. Exact versions not checked.
 
 ## TODO
 
-* speeding up the game as it progresses
 * UI polishing
 * storing high scores
 

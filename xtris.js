@@ -50,7 +50,7 @@
         gridWidth: 10,
         gridHeight: 20,
         colors: ["green", "blue", "red", "orange"],
-        dropTimer: 250,  // milliseconds
+        dropTime: 300,  // milliseconds
         font: "40px sans-serif",
         textColor: "black",
         pausedText: "PAUSED",
@@ -94,9 +94,9 @@
             }
         });
 
-        game.score += (fullRowIndexes.length * 100);
-
         this.removeRows(fullRowIndexes);
+
+        return fullRowIndexes.length;
     };
 
     // Removes the rows with the given indexes, and adds equally
@@ -323,7 +323,7 @@
 
         if (game.board.placePiece(p)) {
             game.board.draw();
-            game.moveTimer = setInterval(game.dropPiece, config.dropTimer);
+            game.moveTimer = setInterval(game.dropPiece, game.dropTime);
         } else {
             // cannot place the new piece -> game over
             game.status = "stopped";
@@ -350,10 +350,16 @@
     };
 
     game.pieceFinished = function() {
+        var rowsCleared;
+
         clearInterval(game.moveTimer);
         game.currentPiece.setInPlace();
         game.score += 10;
-        game.board.checkFullRows();
+        rowsCleared = game.board.checkFullRows();
+        game.score += (rowsCleared * 100);
+        if (rowsCleared > 0) {
+            game.dropTime -= 3;
+        }
         game.updateScore();
         game.board.draw();
         game.nextPiece();
@@ -393,7 +399,7 @@
 
             if (game.status === "paused") {
                 game.status = "running";
-                game.moveTimer = setInterval(game.dropPiece, config.dropTimer);
+                game.moveTimer = setInterval(game.dropPiece, game.dropTime);
                 game.board.clearPauseOverlay();
             } else if (game.status === "running") {
                 game.status = "paused";
@@ -411,6 +417,7 @@
         clearInterval(game.moveTimer);
         game.board = new Board();
         game.status = "running";
+        game.dropTime = config.dropTime;
         game.score = 0;
         game.updateScore();
         game.nextPiece();
