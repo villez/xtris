@@ -106,7 +106,7 @@
         var i, j, emptyRow;
 
         for (i = 0; i < indexes.length; i++) {
-            game.board.elems.splice(indexes[i], 1);
+            this.elems.splice(indexes[i], 1);
         }
 
         for (i = 0; i < indexes.length; i++) {
@@ -115,7 +115,7 @@
                 emptyRow[j] = null;
             }
 
-            game.board.elems.unshift(emptyRow);
+            this.elems.unshift(emptyRow);
         }
     };
 
@@ -126,7 +126,7 @@
 
         piece.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
-                game.board.set(piece.x + x, piece.y + y, {
+                this.board.set(piece.x + x, piece.y + y, {
                     color: piece.color,
                     active: true
                 });
@@ -139,7 +139,7 @@
     Board.prototype.clearPiece = function(piece) {
         piece.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
-                game.board.set(this.x + x, this.y + y, null);
+                this.board.set(this.x + x, this.y + y, null);
             }
         }, piece);
     };
@@ -147,12 +147,6 @@
     Board.prototype.draw = function() {
         var gridBlock;
         var sz = config.blockSize;
-
-        // stop drawing if the game has been stopped in order not to
-        // draw over e.g. the game over text etc.
-        if (game.status === "stopped") {
-            return;
-        }
 
         for (var x = 0; x < config.gridWidth; x++) {
             for (var y = 0; y < config.gridHeight; y++) {
@@ -176,10 +170,10 @@
                     continue;
                 }
 
-                if (!game.board.insideBoard(px + x, py + y)) {
+                if (!this.insideBoard(px + x, py + y)) {
                     ret = false;
                 } else {
-                    gridBlock = game.board.get(px + x, py + y);
+                    gridBlock = this.get(px + x, py + y);
                     if (gridBlock && !gridBlock.active) {
                         ret = false;
                     }
@@ -219,13 +213,14 @@
         ctx.fillText(text, textX, textY);
     };
 
-    function Piece(x, y, color) {
+    function Piece(x, y, color, board) {
         this.x = x;
         this.y = y;
         this.color = color;
         this.piece = PIECES[Math.floor(Math.random() * PIECES.length)];
         this.rotationIndex = 0;
         this.blocks = this.piece[this.rotationIndex];
+        this.board = board;
     }
 
     Piece.prototype.getBlock = function(x, y) {
@@ -233,7 +228,7 @@
     };
 
     Piece.prototype.canMove = function(dx, dy) {
-        return game.board.canPlace(this.blocks, this.x + dx, this.y + dy);
+        return this.board.canPlace(this.blocks, this.x + dx, this.y + dy);
     };
 
     Piece.prototype.moveDown = function() {
@@ -253,12 +248,12 @@
             return false;
         }
 
-        game.board.clearPiece(this);
+        this.board.clearPiece(this);
 
         this.x += dx;
         this.y += dy;
 
-        game.board.placePiece(this);
+        this.board.placePiece(this);
 
         return true;
     };
@@ -268,19 +263,19 @@
             return false;
         }
 
-        game.board.clearPiece(this);
+        this.board.clearPiece(this);
 
         this.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
         this.blocks = this.piece[this.rotationIndex];
 
-        game.board.placePiece(this);
+        this.board.placePiece(this);
     };
 
     Piece.prototype.canRotate = function() {
         var newRotationIndex = (this.rotationIndex + 1) % this.piece.length;
         var rotatedBlocks = this.piece[newRotationIndex];
 
-        return game.board.canPlace(rotatedBlocks, this.x, this.y);
+        return this.board.canPlace(rotatedBlocks, this.x, this.y);
     };
 
     Piece.prototype.forEachBlock = function(callback, thisValue) {
@@ -300,7 +295,7 @@
     Piece.prototype.setInPlace = function() {
         this.forEachBlock(function(x, y) {
             if (this.getBlock(x, y) !== 0) {
-                game.board.set(this.x + x, this.y + y, {
+                this.board.set(this.x + x, this.y + y, {
                     color: this.color,
                     active: false
                 });
@@ -318,7 +313,9 @@
     };
 
     game.nextPiece = function() {
-        var p = new Piece(4, 0, config.colors[Math.floor(Math.random() * config.colors.length)]);
+        var p = new Piece(4, 0,
+                          config.colors[Math.floor(Math.random() * config.colors.length)],
+                         game.board);
         game.currentPiece = p;
 
         if (game.board.placePiece(p)) {
@@ -330,6 +327,14 @@
             clearInterval(game.moveTimer);
             game.currentPiece = null;
             game.board.drawGameOver();
+        }
+    };
+
+    game.draw = function() {
+        // safeguard to make sure the board is not drawn if the game
+        // is not running
+        if (game.status === "running") {
+            game.board.draw();
         }
     };
 
