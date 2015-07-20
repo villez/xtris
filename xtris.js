@@ -319,7 +319,7 @@
         game.currentPiece = p;
 
         if (game.board.placePiece(p)) {
-            game.board.draw();
+            game.draw();
             game.moveTimer = setInterval(game.dropPiece, game.dropTime);
         } else {
             // cannot place the new piece -> game over
@@ -342,7 +342,7 @@
         if (!game.currentPiece.moveDown()) {
             game.pieceFinished();
         }
-        game.board.draw();
+        game.draw();
     };
 
     game.dropPieceAllTheWay = function() {
@@ -366,7 +366,7 @@
             game.dropTime -= 3;
         }
         game.updateScore();
-        game.board.draw();
+        game.draw();
         game.nextPiece();
     };
 
@@ -375,19 +375,19 @@
             switch(event.keyCode) {
             case 37: // left
                 game.currentPiece.moveLeft();
-                game.board.draw();
+                game.draw();
                 break;
             case 38: // up
                 game.currentPiece.rotate();
-                game.board.draw();
+                game.draw();
                 break;
             case 39: // right
                 game.currentPiece.moveRight();
-                game.board.draw();
+                game.draw();
                 break;
             case 40: // down
                 game.dropPieceAllTheWay();
-                game.board.draw();
+                game.draw();
                 break;
             default:
                 // no other keys handled here - pause in its own function
