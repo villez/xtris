@@ -213,10 +213,10 @@
         ctx.fillText(text, textX, textY);
     };
 
-    function Piece(x, y, color, board) {
+    function Piece(x, y, board) {
         this.x = x;
         this.y = y;
-        this.color = color;
+        this.color = config.colors[Math.floor(Math.random() * config.colors.length)];
         this.piece = PIECES[Math.floor(Math.random() * PIECES.length)];
         this.rotationIndex = 0;
         this.blocks = this.piece[this.rotationIndex];
@@ -279,15 +279,9 @@
     };
 
     Piece.prototype.forEachBlock = function(callback, thisValue) {
-        var T;
-
-        if (arguments.length > 1) {
-            T = thisValue;
-        }
-
         for (var x = 0; x < this.blocks[0].length; x++) {
             for (var y = 0; y < this.blocks.length; y++) {
-                callback.call(T, x, y);
+                callback.call(thisValue, x, y);
             }
         }
     };
@@ -313,9 +307,7 @@
     };
 
     game.nextPiece = function() {
-        var p = new Piece(4, 0,
-                          config.colors[Math.floor(Math.random() * config.colors.length)],
-                         game.board);
+        var p = new Piece(4, 0, game.board);
         game.currentPiece = p;
 
         if (game.board.placePiece(p)) {
