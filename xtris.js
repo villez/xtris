@@ -120,10 +120,6 @@
     };
 
     Board.prototype.placePiece = function(piece) {
-        if (!this.canPlace(piece.blocks, piece.x, piece.y)) {
-            return false;
-        }
-
         piece.forEachBlock(function(x, y) {
             if (this.getBlock(x, y)) {
                 this.board.set(piece.x + x, piece.y + y, {
@@ -132,8 +128,6 @@
                 });
             }
         }, piece);
-
-        return true;
     };
 
     Board.prototype.clearPiece = function(piece) {
@@ -161,25 +155,26 @@
         }
     };
 
-    Board.prototype.canPlace = function(blocks, px, py) {
+    Board.prototype.canPlace = function(piece, px, py) {
         var gridBlock;
         var ret = true;
-        for (var x = 0; x < blocks[0].length; x++) {
-            for (var y = 0; y < blocks.length; y++) {
-                if (!blocks[y][x]) {
-                    continue;
-                }
+        px = px || piece.x;
+        py = py || piece.y;
 
-                if (!this.insideBoard(px + x, py + y)) {
+        piece.forEachBlock(function(x, y) {
+            if (!this.blocks[y][x]) {
+                return;
+            }
+
+            if (!this.board.insideBoard(px + x, py + y)) {
+                ret = false;
+            } else {
+                gridBlock = this.board.get(px + x, py + y);
+                if (gridBlock && !gridBlock.active) {
                     ret = false;
-                } else {
-                    gridBlock = this.get(px + x, py + y);
-                    if (gridBlock && !gridBlock.active) {
-                        ret = false;
-                    }
                 }
             }
-        }
+        }, piece);
 
         return ret;
     };
@@ -228,7 +223,7 @@
     };
 
     Piece.prototype.canMove = function(dx, dy) {
-        return this.board.canPlace(this.blocks, this.x + dx, this.y + dy);
+        return this.board.canPlace(this, this.x + dx, this.y + dy);
     };
 
     Piece.prototype.moveDown = function() {
@@ -259,23 +254,22 @@
     };
 
     Piece.prototype.rotate = function() {
-        if (!this.canRotate()) {
-            return false;
+        if (this.canRotate()) {
+            this.board.clearPiece(this);
+            this.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
+            this.blocks = this.piece[this.rotationIndex];
+            this.board.placePiece(this);
         }
-
-        this.board.clearPiece(this);
-
-        this.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
-        this.blocks = this.piece[this.rotationIndex];
-
-        this.board.placePiece(this);
     };
 
     Piece.prototype.canRotate = function() {
-        var newRotationIndex = (this.rotationIndex + 1) % this.piece.length;
-        var rotatedBlocks = this.piece[newRotationIndex];
+        var rotatedPiece = new Piece(this.x, this.y, this.board);
+        rotatedPiece.piece = this.piece;
+        rotatedPiece.blocks = rotatedPiece.piece[rotatedPiece.rotationIndex];
+        rotatedPiece.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
+        rotatedPiece.blocks = rotatedPiece.piece[rotatedPiece.rotationIndex];
 
-        return this.board.canPlace(rotatedBlocks, this.x, this.y);
+        return this.board.canPlace(rotatedPiece);
     };
 
     Piece.prototype.forEachBlock = function(callback, thisValue) {
@@ -310,7 +304,8 @@
         var p = new Piece(4, 0, game.board);
         game.currentPiece = p;
 
-        if (game.board.placePiece(p)) {
+        if (game.board.canPlace(p)) {
+            game.board.placePiece(p);
             game.draw();
             game.moveTimer = setInterval(game.dropPiece, game.dropTime);
         } else {
