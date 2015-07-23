@@ -5,7 +5,7 @@
 (function () {
     "use strict";
 
-    var c = document.getElementById("c");
+    var c = document.querySelector("canvas");
     var ctx = c.getContext("2d");
     ctx.strokeStyle = "black";
 
@@ -404,12 +404,12 @@
     };
 
     game.updateScore = function() {
-        document.getElementsByClassName("game-score")[0].innerHTML = game.score;
+        document.querySelector(".game-score").innerHTML = game.score;
     };
 
     game.showHighScore = function() {
         game.highScore = localStorage.getItem(config.highScoreItem) || 0;
-        document.getElementsByClassName("highscore")[0].innerHTML = game.highScore;
+        document.querySelector(".highscore").innerHTML = game.highScore;
     };
 
     game.saveHighScore = function() {
@@ -432,7 +432,7 @@
 
     window.addEventListener("keydown", game.arrowKeyPress);
     window.addEventListener("keypress", game.togglePause);
-    document.getElementById("restart").addEventListener("click", game.restart);
+    document.querySelector("#restart").addEventListener("click", game.restart);
     game.showHighScore();
 
 }());
