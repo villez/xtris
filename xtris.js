@@ -56,7 +56,8 @@
         pausedText: "PAUSED",
         pausedOverlayColor: "#f0f0f0",
         gameOverText: "GAME OVER",
-        gameOverOverlayColor: "rgba(200, 200, 200, 0.5)"
+        gameOverOverlayColor: "rgba(200, 200, 200, 0.5)",
+        highScoreItem: "xtrisHighScore"
     };
 
     function Board() {
@@ -314,6 +315,7 @@
             clearInterval(game.moveTimer);
             game.currentPiece = null;
             game.board.drawGameOver();
+            game.saveHighScore();
         }
     };
 
@@ -405,6 +407,19 @@
         document.getElementsByClassName("game-score")[0].innerHTML = game.score;
     };
 
+    game.showHighScore = function() {
+        game.highScore = localStorage.getItem(config.highScoreItem) || 0;
+        document.getElementsByClassName("highscore")[0].innerHTML = game.highScore;
+    };
+
+    game.saveHighScore = function() {
+        if (game.score > game.highScore) {
+            game.highScore = game.score;
+            localStorage.setItem(config.highScoreItem, game.score);
+            game.showHighScore();
+        }
+    };
+
     game.restart = function() {
         clearInterval(game.moveTimer);
         game.board = new Board();
@@ -418,5 +433,6 @@
     window.addEventListener("keydown", game.arrowKeyPress);
     window.addEventListener("keypress", game.togglePause);
     document.getElementById("restart").addEventListener("click", game.restart);
+    game.showHighScore();
 
 }());

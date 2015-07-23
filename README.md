@@ -33,7 +33,8 @@ requires a "modern" browser. Exact versions not checked.
 ## TODO
 
 * UI polishing
-* storing high scores
+* high score: asking for a name to record with the score, showing a
+  notice when you reach a new high score, etc.
 
 
 ## Copyright and License

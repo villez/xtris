@@ -23,9 +23,13 @@ body {
     color: #777;
 }
 
-.game-score {
-    margin: 20px 0 0 20px;
-    font: bold 20px sans-serif;
+.game-sidebar > div {
+    margin: 10px 0 0 0;
+}
+
+.game-score, .highscore {
+    margin: 15px 0 0 20px;
+    font: bold 18px sans-serif;
     color: #111;
 }
 
