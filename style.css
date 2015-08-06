@@ -8,6 +8,11 @@ body {
     background-color: hsl(210, 100%, 98%);
 }
 
+.main {
+    max-width: 550px;
+    margin: 0 auto;
+}
+
 .game-main {
     margin: 20px 0 0 0;
     width: 360px;
@@ -16,7 +21,7 @@ body {
 
 .game-sidebar {
     margin: 20px 0 0 20px;
-    width: 300px;
+    width: 150px;
     float: left;
     font: bold 14px sans-serif;
     text-transform: uppercase;
@@ -62,9 +67,8 @@ button:focus {
 }
 
 footer {
-    width: 100%;
-    float: right;
-    margin: 50px 0 0 20px;
+    clear: both;
+    padding: 50px 0 0 20px;
     font: 12px sans-serif;
     color: #777;
 }
