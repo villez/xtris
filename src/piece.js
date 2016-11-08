@@ -1,3 +1,12 @@
+// piece.js - contains the logic for individual pieces
+//
+// The pieces are "live" only - a single active piece exists at any
+// one time when the game is running, and after it has been placed at the
+// bottom, it becomes part of the board's state and can no longer be
+// manipulated individually.
+//
+// (c) Ville Siltanen, 2015-2016. MIT License
+
 function Piece(x, y, board, colors, pieces) {
   this.x = x;
   this.y = y;

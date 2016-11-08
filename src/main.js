@@ -1,5 +1,7 @@
 // Tetris clone in JavaScript, using HTML5 canvas
 //
+// main.js - contains the logic and configuration for running the game
+//
 // (c) Ville Siltanen, 2015-2016. MIT License
 
 import Board from "./board.js";

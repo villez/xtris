@@ -1,3 +1,12 @@
+// board.js - logic for the game board
+//
+// maintains the state of the already placed pieces, logic
+// for placing a new active (moving) piece on the board,
+// removing rows when they become full, and some auxiliary stuff
+// for displaying the paused and game over states
+//
+// (c) Ville Siltanen, 2015-2016. MIT License
+
 function Board(config, canvasRef, ctx) {
   this.config = config;
   this.c = canvasRef;
