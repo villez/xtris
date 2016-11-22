@@ -9,20 +9,18 @@ body {
 }
 
 .main {
-    max-width: 550px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }
 
 .game-main {
     margin: 20px 0 0 0;
-    width: 360px;
-    float: left;
 }
 
 .game-sidebar {
     margin: 20px 0 0 20px;
     width: 150px;
-    float: left;
     font: bold 14px sans-serif;
     text-transform: uppercase;
     color: #777;
@@ -67,7 +65,7 @@ button:focus {
 }
 
 footer {
-    clear: both;
+    text-align: center;
     padding: 50px 0 0 20px;
     font: 12px sans-serif;
     color: #777;
