@@ -59,7 +59,7 @@ var config = {
   pausedOverlayColor: "#f0f0f0",
   gameOverText: "GAME OVER",
   gameOverOverlayColor: "rgba(200, 200, 200, 0.5)",
-  highScoreItem: "xtrisHighScore"
+  highScoreItem: "xytrizHighScore"
 };
 
 var game = {

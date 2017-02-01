@@ -1,5 +1,5 @@
 {
-  "name": "xtris",
+  "name": "xytriz",
   "version": "1.0.0",
   "description": "Tetris clone using HTML5 canvas",
   "devDependencies": {
