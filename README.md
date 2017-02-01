@@ -1,4 +1,4 @@
-## Xtris
+## Xytriz
 
 A toy Tetris clone in JavaScript, utilizing the HTML5 canvas.
 
@@ -39,4 +39,4 @@ requires a "modern" browser. Exact versions not checked.
 
 ## Copyright and License
 
-(c) Ville Siltanen, 2015. MIT License
+(c) Ville Siltanen, 2015-2017. MIT License

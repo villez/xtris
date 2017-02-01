@@ -2,7 +2,7 @@ module.exports = {
   entry: "./src/main.js",
   output: {
     path: "./",
-    filename: "xtris.js"
+    filename: "xytriz.js"
   },
   module: {
     loaders: [{
