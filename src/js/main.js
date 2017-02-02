@@ -4,6 +4,7 @@
 //
 // (c) Ville Siltanen, 2015-2016. MIT License
 
+import css from "../css/style.css";
 import Board from "./board.js";
 import Piece from "./piece.js";
 

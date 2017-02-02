@@ -1,16 +1,21 @@
+const path = require("path");
+
 module.exports = {
-  entry: "./src/main.js",
+  entry: "./src/js/main.js",
   output: {
-    path: "./",
+    path: "./build",
     filename: "xytriz.js"
   },
   module: {
     loaders: [{
-      exclude: /(node_modules|bower_components)/,
-      loader: "babel",
+      test: /\.js$/,
+      loader: "babel-loader",
       query: {
         presets: ["es2015"]
       }
+    }, {
+      test: /\.css$/,
+      loaders: ["style-loader", "css-loader"]
     }]
   }
 };

@@ -5,6 +5,12 @@
   "devDependencies": {
     "babel-core": "^6.17.0",
     "babel-loader": "^6.2.5",
-    "babel-preset-es2015": "^6.16.0"
+    "babel-preset-es2015": "^6.16.0",
+    "css-loader": "^0.26.1",
+    "style-loader": "^0.13.1",
+    "webpack": "^2.2.1"
+  },
+  "scripts": {
+    "build": "webpack --progress --color && cp src/html/xytriz.html build/index.html"
   }
 }
