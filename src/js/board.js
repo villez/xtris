@@ -147,12 +147,14 @@ class Board {
   }
 
   drawCenteredText(text) {
-    // centering the text horizontally based on its actual size
-    const textX = (this.c.width - this.ctx.measureText(text).width) / 2;
-    const textY = (this.c.height / 2);  // vertically just approximately centered
-
     this.ctx.fillStyle = this.config.textColor;
     this.ctx.font = this.config.font;
+
+    // centering the text horizontally based on its actual size;
+    // Note! font needs to be set before the measurement to get valid
+    // result, as text size obviously depends on font size and style
+    const textX = (this.c.width - this.ctx.measureText(text).width) / 2;
+    const textY = (this.c.height / 2);  // vertically just approximately centered
 
     this.ctx.fillText(text, textX, textY);
   }
