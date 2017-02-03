@@ -64,7 +64,7 @@ Piece.prototype.rotate = function() {
 };
 
 Piece.prototype.canRotate = function() {
-  var rotatedPiece = new Piece(this.x, this.y, this.board, this.colors, this.pieces);
+  let rotatedPiece = new Piece(this.x, this.y, this.board, this.colors, this.pieces);
   rotatedPiece.piece = this.piece;
   rotatedPiece.blocks = rotatedPiece.piece[rotatedPiece.rotationIndex];
   rotatedPiece.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
@@ -74,8 +74,8 @@ Piece.prototype.canRotate = function() {
 };
 
 Piece.prototype.forEachBlock = function(callback, thisValue) {
-  for (var x = 0; x < this.blocks[0].length; x++) {
-    for (var y = 0; y < this.blocks.length; y++) {
+  for (let x = 0; x < this.blocks[0].length; x++) {
+    for (let y = 0; y < this.blocks.length; y++) {
       callback.call(thisValue, x, y);
     }
   }

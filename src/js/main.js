@@ -8,11 +8,11 @@ import css from "../css/style.css";
 import Board from "./board.js";
 import Piece from "./piece.js";
 
-var c = document.querySelector("canvas");
-var ctx = c.getContext("2d");
+const c = document.querySelector("canvas");
+const ctx = c.getContext("2d");
 ctx.strokeStyle = "black";
 
-var PIECES = [
+const PIECES = [
   [
     [[1, 1], [1, 1]]
   ],
@@ -48,7 +48,7 @@ var PIECES = [
   ]
 ];
 
-var config = {
+const config = {
   blockSize: 30,
   gridWidth: 10,
   gridHeight: 20,
@@ -63,7 +63,7 @@ var config = {
   highScoreItem: "xytrizHighScore"
 };
 
-var game = {
+const game = {
   board: null,
   moveTimer: null,
   currentPiece: null,
@@ -72,7 +72,7 @@ var game = {
 };
 
 game.nextPiece = function() {
-  var p = new Piece(4, 0, game.board, config.colors, PIECES);
+  const p = new Piece(4, 0, game.board, config.colors, PIECES);
   game.currentPiece = p;
 
   if (game.board.canPlace(p)) {
@@ -114,12 +114,10 @@ game.dropPieceAllTheWay = function() {
 };
 
 game.pieceFinished = function() {
-  var rowsCleared;
-
   clearInterval(game.moveTimer);
   game.currentPiece.setInPlace();
   game.score += 10;
-  rowsCleared = game.board.checkFullRows();
+  const rowsCleared = game.board.checkFullRows();
   game.score += (rowsCleared * 100);
   if (rowsCleared > 0) {
     game.dropTime -= 3;
