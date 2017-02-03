@@ -2,7 +2,7 @@
 //
 // main.js - contains the logic and configuration for running the game
 //
-// (c) Ville Siltanen, 2015-2016. MIT License
+// (c) Ville Siltanen, 2015-2017. MIT License
 
 import css from "../css/style.css";
 import Board from "./board.js";
