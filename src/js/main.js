@@ -5,63 +5,13 @@
 // (c) Ville Siltanen, 2015-2017. MIT License
 
 import css from "../css/style.css";
+import { config, pieces } from "./config.js";
 import Board from "./board.js";
 import Piece from "./piece.js";
 
 const c = document.querySelector("canvas");
 const ctx = c.getContext("2d");
 ctx.strokeStyle = "black";
-
-const PIECES = [
-  [
-    [[1, 1], [1, 1]]
-  ],
-  [
-    [[1], [1], [1], [1]],
-    [[1, 1, 1, 1]]
-  ],
-  [
-    [[0, 1, 0], [1, 1, 1]],
-    [[1, 0], [1, 1], [1, 0]],
-    [[1, 1, 1], [0, 1, 0]],
-    [[0, 1], [1, 1], [0, 1]]
-  ],
-  [
-    [[1, 1, 0], [0, 1, 1]],
-    [[0, 1], [1, 1], [1, 0]]
-  ],
-  [
-    [[0, 1, 1], [1, 1, 0]],
-    [[1, 0], [1, 1], [0, 1]]
-  ],
-  [
-    [[1, 1], [0, 1], [0, 1]],
-    [[0, 0, 1], [1, 1, 1]],
-    [[1, 0], [1, 0], [1, 1]],
-    [[1, 1, 1], [1, 0, 0]]
-  ],
-  [
-    [[1, 1], [1, 0], [1, 0]],
-    [[1, 1, 1], [0, 0, 1]],
-    [[0, 1], [0, 1], [1, 1]],
-    [[1, 0, 0], [1, 1, 1]]
-  ]
-];
-
-const config = {
-  blockSize: 30,
-  gridWidth: 10,
-  gridHeight: 20,
-  colors: ["#15d600", "#000bd6", "#d60e00", "#d68b00", "#00c4d6", "#d600d6"],
-  dropTime: 300,  // milliseconds
-  font: "40px sans-serif",
-  textColor: "black",
-  pausedText: "PAUSED",
-  pausedOverlayColor: "#f0f0f0",
-  gameOverText: "GAME OVER",
-  gameOverOverlayColor: "rgba(200, 200, 200, 0.5)",
-  highScoreItem: "xytrizHighScore"
-};
 
 const game = {
   board: null,
@@ -72,7 +22,7 @@ const game = {
 };
 
 game.nextPiece = function() {
-  const p = new Piece(4, 0, game.board, config.colors, PIECES);
+  const p = new Piece(4, 0, game.board, config.colors, pieces);
   game.currentPiece = p;
 
   if (game.board.canPlace(p)) {
