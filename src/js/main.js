@@ -8,10 +8,7 @@ import css from "../css/style.css";
 import { config, pieces } from "./config.js";
 import Board from "./board.js";
 import Piece from "./piece.js";
-
-const c = document.querySelector("canvas");
-const ctx = c.getContext("2d");
-ctx.strokeStyle = "black";
+import display from "./display.js";
 
 const game = {
   board: null,
@@ -34,7 +31,7 @@ game.nextPiece = function() {
     game.status = "stopped";
     clearInterval(game.moveTimer);
     game.currentPiece = null;
-    game.board.drawGameOver();
+    display.drawGameOver();
     game.saveHighScore();
   }
 };
@@ -43,7 +40,7 @@ game.draw = function() {
   // safeguard to make sure the board is not drawn if the game
   // is not running
   if (game.status === "running") {
-    game.board.draw();
+    display.drawBoard(game.board);
   }
 };
 
@@ -112,11 +109,12 @@ game.togglePause = function(event) {
     if (game.status === "paused") {
       game.status = "running";
       game.moveTimer = setInterval(game.dropPiece, game.dropTime);
-      game.board.clearPauseOverlay();
+      display.clearPauseOverlay();
+      game.draw();
     } else if (game.status === "running") {
       game.status = "paused";
       clearInterval(game.moveTimer);
-      game.board.drawPauseOverlay();
+      display.drawPauseOverlay();
     }
   }
 };
@@ -126,21 +124,21 @@ game.updateScore = function() {
 };
 
 game.showHighScore = function() {
-  game.highScore = localStorage.getItem(config.highScoreItem) || 0;
+  game.highScore = localStorage.getItem(config.highScoreLocalStorageKey) || 0;
   document.querySelector(".highscore").innerHTML = game.highScore;
 };
 
 game.saveHighScore = function() {
   if (game.score > game.highScore) {
     game.highScore = game.score;
-    localStorage.setItem(config.highScoreItem, game.score);
+    localStorage.setItem(config.highScoreLocalStorageKey, game.score);
     game.showHighScore();
   }
 };
 
 game.restart = function() {
   clearInterval(game.moveTimer);
-  game.board = new Board(config, c, ctx);
+  game.board = new Board();
   game.status = "running";
   game.dropTime = config.dropTime;
   game.score = 0;
