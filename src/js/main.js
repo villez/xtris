@@ -10,25 +10,31 @@ import Board from "./board.js";
 import Piece from "./piece.js";
 import display from "./display.js";
 
+const states = {
+  STOPPED: 0,
+  RUNNING: 1,
+  PAUSED: 2
+};
+
 const game = {
   board: null,
   moveTimer: null,
   currentPiece: null,
-  status: "stopped",
-  score: 0
+  score: 0,
+  status: states.STOPPED
 };
 
 game.nextPiece = function() {
   const p = new Piece(4, 0, game.board, config.colors, pieces);
-  game.currentPiece = p;
 
   if (game.board.canPlace(p)) {
     game.board.placePiece(p);
+    game.currentPiece = p;
     game.draw();
     game.moveTimer = setInterval(game.dropPiece, game.dropTime);
   } else {
     // cannot place the new piece -> game over
-    game.status = "stopped";
+    game.state = states.STOPPED;
     clearInterval(game.moveTimer);
     game.currentPiece = null;
     display.drawGameOver();
@@ -39,7 +45,7 @@ game.nextPiece = function() {
 game.draw = function() {
   // safeguard to make sure the board is not drawn if the game
   // is not running
-  if (game.status === "running") {
+  if (game.state === states.RUNNING) {
     display.drawBoard(game.board);
   }
 };
@@ -75,7 +81,7 @@ game.pieceFinished = function() {
 };
 
 game.arrowKeyPress = function(event) {
-  if (game.status === "running") {
+  if (game.state === states.RUNNING) {
     switch(event.keyCode) {
     case 37: // left
       game.currentPiece.moveLeft();
@@ -104,15 +110,15 @@ game.togglePause = function(event) {
       event.keyCode === 112 ||
       event.keyCode === 80) {
 
-    // note: if game.status === "stopped", do nothing
+    // note: if game.state === states.STOPPED, do nothing
 
-    if (game.status === "paused") {
-      game.status = "running";
+    if (game.state === states.PAUSED) {
+      game.state = states.RUNNING;
       game.moveTimer = setInterval(game.dropPiece, game.dropTime);
       display.clearPauseOverlay();
       game.draw();
-    } else if (game.status === "running") {
-      game.status = "paused";
+    } else if (game.state === states.RUNNING) {
+      game.state = states.PAUSED;
       clearInterval(game.moveTimer);
       display.drawPauseOverlay();
     }
@@ -139,7 +145,7 @@ game.saveHighScore = function() {
 game.restart = function() {
   clearInterval(game.moveTimer);
   game.board = new Board();
-  game.status = "running";
+  game.state = states.RUNNING;
   game.dropTime = config.dropTime;
   game.score = 0;
   game.updateScore();
