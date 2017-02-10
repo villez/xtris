@@ -85,17 +85,6 @@ class Piece {
       }
     }
   }
-
-  setInPlace() {
-    this.forEachBlock(function(x, y) {
-      if (this.blockAt(x, y) !== 0) {
-        this.board.set(this.x + x, this.y + y, {
-          color: this.color,
-          active: false
-        });
-      }
-    }, this);
-  }
 }
 
 export default Piece

@@ -109,6 +109,18 @@ class Board {
 
     return ret;
   }
+
+  setPieceInPlace(piece) {
+    const board = this;
+    piece.forEachBlock(function(x, y) {
+      if (this.blockAt(x, y) !== 0) {
+        board.set(this.x + x, this.y + y, {
+          color: this.color,
+          active: false
+        });
+      }
+    }, piece);
+  }
 }
 
 export default Board

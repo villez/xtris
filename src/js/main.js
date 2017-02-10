@@ -68,7 +68,7 @@ game.dropPieceAllTheWay = function() {
 
 game.pieceFinished = function() {
   clearInterval(game.moveTimer);
-  game.currentPiece.setInPlace();
+  game.board.setPieceInPlace(game.currentPiece);
   game.score += 10;
   const rowsCleared = game.board.checkFullRows();
   game.score += (rowsCleared * 100);
