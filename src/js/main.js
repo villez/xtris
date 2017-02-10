@@ -5,9 +5,10 @@
 // (c) Ville Siltanen, 2015-2017. MIT License
 
 import css from "../css/style.css";
-import { config, pieces } from "./config.js";
-import Board from "./board.js";
-import Piece from "./piece.js";
+import config from "./config.js";
+import pieces from "./pieces.js";
+import Board from "./Board.js";
+import Piece from "./Piece.js";
 import display from "./display.js";
 
 const states = {

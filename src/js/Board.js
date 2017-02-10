@@ -7,7 +7,7 @@
 //
 // (c) Ville Siltanen, 2015-2017. MIT License
 
-import { config } from "./config.js";
+import config from "./config.js";
 
 class Board {
   constructor() {
