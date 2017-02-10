@@ -70,7 +70,7 @@ class Board {
 
   placePiece(piece) {
     piece.forEachBlock(function(x, y) {
-      if (this.getBlock(x, y)) {
+      if (this.blockAt(x, y)) {
         this.board.set(piece.x + x, piece.y + y, {
           color: piece.color,
           active: true
@@ -81,7 +81,7 @@ class Board {
 
   clearPiece(piece) {
     piece.forEachBlock(function(x, y) {
-      if (this.getBlock(x, y)) {
+      if (this.blockAt(x, y)) {
         this.board.set(this.x + x, this.y + y, null);
       }
     }, piece);

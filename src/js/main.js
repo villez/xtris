@@ -6,7 +6,6 @@
 
 import css from "../css/style.css";
 import config from "./config.js";
-import pieces from "./pieces.js";
 import Board from "./Board.js";
 import Piece from "./Piece.js";
 import display from "./display.js";
@@ -26,7 +25,7 @@ const game = {
 };
 
 game.nextPiece = function() {
-  const p = new Piece(4, 0, game.board, config.colors, pieces);
+  const p = new Piece(4, 0, game.board);
 
   if (game.board.canPlace(p)) {
     game.board.placePiece(p);

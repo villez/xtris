@@ -7,20 +7,24 @@
 //
 // (c) Ville Siltanen, 2015-2017. MIT License
 
+import config from "./config.js";
+import pieces from "./pieces.js";
+
 class Piece {
-  constructor(x, y, board, colors, pieces) {
+  constructor(x, y, board) {
     this.x = x;
     this.y = y;
-    this.colors = colors;
-    this.pieces = pieces;
-    this.color = colors[Math.floor(Math.random() * colors.length)];
+    this.color = config.colors[Math.floor(Math.random() * config.colors.length)];
     this.piece = pieces[Math.floor(Math.random() * pieces.length)];
     this.rotationIndex = 0;
-    this.blocks = this.piece[this.rotationIndex];
     this.board = board;
   }
 
-  getBlock(x, y) {
+  get blocks() {
+    return this.piece[this.rotationIndex];
+  }
+
+  blockAt(x, y) {
     return this.blocks[y][x];
   }
 
@@ -59,19 +63,19 @@ class Piece {
     if (this.canRotate()) {
       this.board.clearPiece(this);
       this.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
-      this.blocks = this.piece[this.rotationIndex];
       this.board.placePiece(this);
     }
   }
 
   canRotate() {
-    let rotatedPiece = new Piece(this.x, this.y, this.board, this.colors, this.pieces);
-    rotatedPiece.piece = this.piece;
-    rotatedPiece.blocks = rotatedPiece.piece[rotatedPiece.rotationIndex];
-    rotatedPiece.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
-    rotatedPiece.blocks = rotatedPiece.piece[rotatedPiece.rotationIndex];
+    const originalRotationIndex = this.rotationIndex;
+    this.rotationIndex = (this.rotationIndex + 1) % this.piece.length;
 
-    return this.board.canPlace(rotatedPiece);
+    const result = this.board.canPlace(this);
+
+    this.rotationIndex = originalRotationIndex;
+
+    return result;
   }
 
   forEachBlock(callback, thisValue) {
@@ -84,7 +88,7 @@ class Piece {
 
   setInPlace() {
     this.forEachBlock(function(x, y) {
-      if (this.getBlock(x, y) !== 0) {
+      if (this.blockAt(x, y) !== 0) {
         this.board.set(this.x + x, this.y + y, {
           color: this.color,
           active: false
