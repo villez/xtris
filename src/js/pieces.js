@@ -1,46 +1,32 @@
-const basePieces = [
-  // O
-  {
-    base: [[1, 1],
+const basePieces = [{
+    base: [[1, 1],     // O
            [1, 1]],
     rotations: 1
-  },
-  // I
-  {
-    base: [[1],
+  }, {
+    base: [[1],        // I
            [1],
            [1],
            [1]],
     rotations: 2
-  },
-  // T
-  {
-    base: [[0, 1, 0],
+  }, {
+    base: [[0, 1, 0],  // T
            [1, 1, 1]],
     rotations: 4
-  },
-  // Z
-  {
-    base: [[1, 1, 0],
+  }, {
+    base: [[1, 1, 0],  // Z
            [0, 1, 1]],
     rotations: 2
-  },
-  // S
-  {
-    base: [[0, 1, 1],
+  }, {
+    base: [[0, 1, 1],  // S
            [1, 1, 0]],
     rotations: 2
-  },
-  // L
-  {
-    base: [[1, 1],
+  }, {
+    base: [[1, 1],    // L
            [0, 1],
            [0, 1]],
     rotations: 4
-  },
-  // J
-  {
-    base: [[1, 1],
+  }, {
+    base: [[1, 1],    // J
            [1, 0],
            [1, 0]],
     rotations: 4
@@ -62,7 +48,7 @@ function rotation(array) {
   const result = [];
 
   for (let i = 0; i < cols; i++) {
-    result[i]= result[i] || [];
+    result[i] = result[i] || [];
     for (let j = 0; j < rows; j++) {
       result[i][j] = array[rows - j - 1][i];
     }
@@ -75,10 +61,10 @@ function rotation(array) {
 function calculateRotatedPieces() {
   const rotatedPieces = [];
 
-  for (let idx = 0; idx < basePieces.length; idx++) {
+  for (const [idx, piece] of basePieces.entries()) {
     rotatedPieces[idx] = [];
-    for (let rotationCount = 0; rotationCount < basePieces[idx].rotations; rotationCount++) {
-      rotatedPieces[idx].push(nthRotation(basePieces[idx].base, rotationCount));
+    for (let rotationCount = 0; rotationCount < piece.rotations; rotationCount++) {
+      rotatedPieces[idx].push(nthRotation(piece.base, rotationCount));
     }
   }
   return rotatedPieces;
