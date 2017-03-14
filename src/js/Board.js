@@ -11,13 +11,8 @@ import config from "./config.js";
 
 class Board {
   constructor() {
-    this.elems = [];
-    for (let row = 0; row < config.gridHeight; row++) {
-      this.elems[row] = [];
-      for (let column = 0; column < config.gridWidth; column++) {
-        this.elems[row].push(null);
-      }
-    }
+    this.elems = Array.new(config.gridHeight)
+      .fill(Array.new(config.gridWidth).fill(null));
   }
 
   get(x, y) {
@@ -37,9 +32,8 @@ class Board {
     let fullRowIndexes = [];
 
     this.elems.forEach(function(row, idx) {
-      isFull = row.every(function(column) {
-        return column !== null;
-      });
+      isFull = row.every(column => column !== null);
+
       if (isFull) {
         fullRowIndexes.unshift(idx);
       }
