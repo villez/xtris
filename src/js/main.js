@@ -80,9 +80,19 @@ game.pieceFinished = function() {
   game.nextPiece();
 };
 
-game.arrowKeyPress = function(event) {
+game.keyPress = function(event) {
+  // arrow keys = 37-40
+  if (event.keyCode >= 37 && event.keyCode <= 40) {
+    game.arrowKeyPress(event.keyCode);
+  } else if (event.keyCode === 80) { // "p"
+    game.togglePause();
+  }
+  // no functionality for other keys
+};
+
+game.arrowKeyPress = function(keyCode) {
   if (game.state === states.RUNNING) {
-    switch(event.keyCode) {
+    switch(keyCode) {
     case 37: // left
       game.currentPiece.moveLeft();
       game.draw();
@@ -106,23 +116,24 @@ game.arrowKeyPress = function(event) {
 };
 
 game.togglePause = function(event) {
-  if (event.key === "p" ||
-      event.keyCode === 112 ||
-      event.keyCode === 80) {
-
-    // note: if game.state === states.STOPPED, do nothing
-
-    if (game.state === states.PAUSED) {
-      game.state = states.RUNNING;
-      game.moveTimer = setInterval(game.dropPiece, game.dropTime);
+    switch (game.state) {
+    case states.PAUSED:
       display.clearPauseOverlay();
+      game.state = states.RUNNING;
       game.draw();
-    } else if (game.state === states.RUNNING) {
+      game.moveTimer = setInterval(game.dropPiece, game.dropTime);
+      break;
+    case states.RUNNING:
       game.state = states.PAUSED;
       clearInterval(game.moveTimer);
       display.drawPauseOverlay();
+      break;
+    case states.STOPPED:
+      // pause does nothing if game not running
+      break;
+    default:
+      break;
     }
-  }
 };
 
 game.updateScore = function() {
@@ -152,7 +163,6 @@ game.restart = function() {
   game.nextPiece();
 };
 
-window.addEventListener("keydown", game.arrowKeyPress);
-window.addEventListener("keypress", game.togglePause);
+window.addEventListener("keydown", game.keyPress);
 document.querySelector("#restart").addEventListener("click", game.restart);
 game.showHighScore();
