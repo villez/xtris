@@ -11,9 +11,9 @@ import Piece from "./Piece.js";
 import display from "./display.js";
 
 const states = {
-  STOPPED: 0,
-  RUNNING: 1,
-  PAUSED: 2
+  STOPPED: "stopped",
+  RUNNING: "running",
+  PAUSED: "paused"
 };
 
 const game = {
@@ -21,7 +21,7 @@ const game = {
   moveTimer: null,
   currentPiece: null,
   score: 0,
-  status: states.STOPPED
+  state: states.STOPPED
 };
 
 game.nextPiece = function() {
